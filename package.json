@@ -1,8 +1,8 @@
 {
   "name": "goated-tizenbrew",
   "appName": "Goated",
-  "version": "0.3.2",
-  "description": "Netflix-style Samsung TV remote navigation for Goated.",
+  "version": "0.4.0",
+  "description": "Netflix-style Samsung TV navigation and source acceleration for Goated.",
   "packageType": "mods",
   "websiteURL": "https://goated.cx/",
   "main": "main.js",
