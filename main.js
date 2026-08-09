@@ -299,6 +299,8 @@
     if (key === 'MediaPlayPause' || key === 'PlayPause') return togglePlayback();
     if (key === 'MediaFastForward' || key === 'FastForward') return seek(15);
     if (key === 'MediaRewind' || key === 'Rewind') return seek(-15);
+    if (key === 'MediaTrackNext') return seek(15);
+    if (key === 'MediaTrackPrevious') return seek(-15);
     if (key === 'MediaStop' || key === 'Stop') {
       var video = videoElement();
       if (!video) return false;
@@ -313,7 +315,8 @@
     var codeMap = {
       13: 'Enter', 37: 'ArrowLeft', 38: 'ArrowUp', 39: 'ArrowRight', 40: 'ArrowDown',
       10009: 'Back', 412: 'MediaRewind', 413: 'MediaStop', 415: 'MediaPlay',
-      417: 'MediaFastForward', 19: 'MediaPause', 10252: 'MediaPlayPause'
+      417: 'MediaFastForward', 19: 'MediaPause', 10232: 'MediaTrackPrevious',
+      10233: 'MediaTrackNext', 10252: 'MediaPlayPause'
     };
     return codeMap[event.keyCode] || codeMap[event.which] || event.key || event.code || '';
   }
@@ -368,6 +371,7 @@
   }
 
   function playerArrow(key) {
+    wakePlayer();
     var current = focusedElement();
     var label = current ? (current.getAttribute('aria-label') || '') : '';
     var onPlayerControl = current && current.closest && current.closest('button');
@@ -408,11 +412,10 @@
     if (/^Arrow(Up|Down|Left|Right)$/.test(key)) {
       var active = focusedElement();
       if (isTextInput(active) && (key === 'ArrowLeft' || key === 'ArrowRight')) return;
-      var moved = isPlayerPage() ? playerArrow(key) : spatialMove(key.slice(5).toLowerCase());
-      if (moved) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
+      if (isPlayerPage()) playerArrow(key);
+      else spatialMove(key.slice(5).toLowerCase());
+      event.preventDefault();
+      event.stopPropagation();
       return;
     }
 
