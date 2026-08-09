@@ -1,10 +1,11 @@
 {
   "name": "goated-tizenbrew",
   "appName": "Goated",
-  "version": "0.1.0",
-  "description": "Launches Goated in a TizenBrew TV app.",
-  "packageType": "app",
-  "appPath": "app/index.html",
+  "version": "0.2.0",
+  "description": "Adds Samsung TV remote navigation to Goated.",
+  "packageType": "mods",
+  "websiteURL": "https://goated.cx/",
+  "main": "main.js",
   "keys": [
     "MediaPlayPause",
     "MediaPlay",
@@ -13,7 +14,13 @@
     "MediaFastForward",
     "MediaRewind",
     "MediaTrackNext",
-    "MediaTrackPrevious"
+    "MediaTrackPrevious",
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "Enter",
+    "Back"
   ],
   "license": "UNLICENSED"
 }
