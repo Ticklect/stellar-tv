@@ -179,7 +179,9 @@
   function ensureFocus(force) {
     var scope = activeScope();
     if (scope !== state.previousScope) {
-      if (state.previousScope && state.current && state.previousScope.contains(state.current)) state.previousFocus = state.current;
+      if (scope !== document.body && state.previousScope && state.current && state.previousScope.contains(state.current)) {
+        state.previousFocus = state.current;
+      }
       state.previousScope = scope;
       force = true;
     }
@@ -218,6 +220,22 @@
     var current = focusedElement();
     if (!current || !scope.contains(current)) {
       return setFocus(preferredInitial(scope));
+    }
+
+    if (direction === 'down' && isTextInput(current)) {
+      var primaryAction = items.filter(function (element) {
+        var label = (element.getAttribute('aria-label') || element.textContent || '').trim();
+        return label === 'Play';
+      })[0];
+      if (primaryAction) return setFocus(primaryAction);
+    }
+
+    if (direction === 'up') {
+      var currentLabel = (current.getAttribute('aria-label') || current.textContent || '').trim();
+      if (currentLabel === 'Play') {
+        var searchInput = items.filter(isTextInput)[0];
+        if (searchInput) return setFocus(searchInput);
+      }
     }
 
     if ((direction === 'left' || direction === 'right') && railFor(current)) {
@@ -331,6 +349,7 @@
     if (isTextInput(current)) return false;
     if (current.matches('a, button, [role="button"], [role="link"]') || typeof current.onclick === 'function') {
       current.click();
+      setTimeout(function () { ensureFocus(false); }, 240);
       return true;
     }
     return false;
@@ -350,7 +369,11 @@
           return rect.top < window.innerHeight * 0.3 && rect.right > window.innerWidth * 0.6;
         })[0];
       }
-      if (close) { close.click(); return true; }
+      if (close) {
+        close.click();
+        setTimeout(function () { ensureFocus(false); }, 240);
+        return true;
+      }
     }
 
     var current = focusedElement();
@@ -358,7 +381,11 @@
 
     if (isPlayerPage()) {
       var backButton = document.querySelector('button[aria-label="Back"]');
-      if (backButton && isVisible(backButton)) { backButton.click(); return true; }
+      if (backButton && isVisible(backButton)) {
+        backButton.click();
+        setTimeout(function () { ensureFocus(false); }, 240);
+        return true;
+      }
     }
     if (window.history.length > 1) { window.history.back(); return true; }
     try {
@@ -439,8 +466,11 @@
   }
 
   function scheduleRefresh() {
-    clearTimeout(state.mutationTimer);
-    state.mutationTimer = setTimeout(function () { ensureFocus(false); }, 120);
+    if (state.mutationTimer) return;
+    state.mutationTimer = setTimeout(function () {
+      state.mutationTimer = null;
+      ensureFocus(false);
+    }, 180);
   }
 
   function start() {

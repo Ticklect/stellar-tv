@@ -2,7 +2,7 @@
 
 This is a TizenBrew site-modification module for `https://goated.cx/`.
 
-The module adds Netflix-style spatial navigation for Goated's header, horizontal content rails, popups, title details, search controls, and video player. It includes a strong visible focus ring, OK/Enter activation, modal-aware Back behavior, Play/Pause, Stop, and 15-second seek controls. Playback still depends on the website's video sources being compatible with the Samsung TV browser.
+The module adds Netflix-style spatial navigation for Goated's header, horizontal content rails, popups, title details, search controls, and video player. It includes a strong visible focus ring, OK/Enter activation, modal-aware Back behavior, Play/Pause, Stop, and 15-second seek controls. Focus is restored to the originating poster after dialogs close, and search navigation moves between the query field and the primary result action. Playback still depends on the website's video sources being compatible with the Samsung TV browser.
 
 To install through TizenBrew's module manager, the package must be published as an npm package or placed in a GitHub repository that TizenBrew can fetch.
 
