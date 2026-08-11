@@ -15,7 +15,7 @@ The project does not scrape, mirror, index, proxy, or bundle Goated's pages or m
 
 ## Features
 
-- Samsung remote arrow-key navigation across the header, content rails, dialogs, search, and player
+- Samsung/Tizen and Android TV D-pad navigation across the header, content rails, dialogs, search, and player
 - Spatial, TV-style focus selection with direct movement between horizontal rails
 - High-contrast focus indicators and automatic focus recovery after page updates
 - OK/Enter activation and modal-aware Back-button behavior
@@ -86,7 +86,7 @@ Using a new explicit version is important because TizenBrew 2.0.5 can retain an 
 
 ### Android TV / Google TV
 
-Download `goated-android-tv-v0.5.0.apk` from the [v0.5.0 release](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0), then enable developer options and USB/network debugging on the Android TV device. Connect with ADB, approve the debugging prompt shown by the TV, and install or update the signed APK:
+[Download the signed Android TV APK](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.0/goated-android-tv-v0.5.0.apk) from the [v0.5.0 release](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0), then enable developer options and USB/network debugging on the Android TV device. Connect with ADB, approve the debugging prompt shown by the TV, and install or update the signed APK:
 
 ```sh
 adb install -r goated-android-tv-v0.5.0.apk
@@ -100,24 +100,32 @@ To build and sideload the development version instead:
 4. Connect with ADB, approve the debugging prompt shown by the TV, then run:
 
    ```sh
-   adb install -r android-tv/app/build/outputs/apk/debug/app-debug.apk
+   adb install -r app/build/outputs/apk/debug/app-debug.apk
    ```
 
 5. Launch **Goated TV (Unofficial)** from the TV apps screen.
 
 Debug APKs are signed only with the local Android debug key and are intended for testing. Public release APKs use the project's permanent signing identity so later versions can update the installed app. Release-signing environment variables are documented in [android-tv/README.md](android-tv/README.md); signing keys and passwords must never be committed.
 
+For device-specific developer-mode, wireless-pairing, launch, update, and troubleshooting steps, see the [complete Android TV installation guide](android-tv/README.md#install-on-an-android-tv-or-google-tv).
+
 ## Remote controls
 
 | Remote input              | Behavior                                                                                                                 |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Arrow keys                | Move spatial focus; seek on a player without a focused control                                                           |
-| OK / Enter                | Activate the focused item; toggle playback on the player when appropriate                                                |
+| D-pad / arrow keys        | Move spatial focus; seek on a player without a focused control                                                           |
+| OK / Enter / controller A | Activate the focused item; toggle playback on the player when appropriate                                                |
 | Back                      | Close the active layer, leave a text field, use the player's Back control, navigate history, or exit as a final fallback |
 | Play / Pause / Play-Pause | Control the active video                                                                                                 |
 | Fast-forward / Rewind     | Seek forward or backward 15 seconds                                                                                      |
 | Next / Previous track     | Seek forward or backward 15 seconds                                                                                      |
 | Stop                      | Pause and return the video to the beginning                                                                              |
+
+### Android remote compatibility
+
+The Android APK handles standard Android TV key codes rather than identifying a remote brand. It is therefore expected to work with remotes for Google TV Streamer, Chromecast with Google TV, NVIDIA Shield TV, Xiaomi TV boxes/sticks, onn. Google TV devices, and Sony, TCL, Hisense, or Philips Android/Google TVs when those remotes report the standard D-pad, Select, Back, or media keys. Generic Bluetooth/USB remotes, game controllers, and HDMI-CEC TV remotes are also expected to work when Android maps their controls to those standard keys.
+
+These physical remote models are expected-compatible, not yet project-confirmed. Only the Android TV API 36 emulator has been directly validated. Voice assistant, volume, power, channel, guide, number, and colored buttons are not mapped by this app; Android or the television may handle them independently.
 
 ## Development
 
