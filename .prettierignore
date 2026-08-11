@@ -2,4 +2,8 @@ node_modules/
 coverage/
 *.tgz
 LICENSE
-
+android-tv/.gradle/
+android-tv/**/build/
+android-tv/gradle/
+android-tv/gradlew
+android-tv/gradlew.bat

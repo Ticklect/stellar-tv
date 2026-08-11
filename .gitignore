@@ -9,4 +9,9 @@ coverage/
 Thumbs.db
 .vscode/
 .idea/
-
+dist/
+android-tv/local.properties
+android-tv/.gradle/
+android-tv/**/build/
+android-tv/*.jks
+android-tv/*.keystore

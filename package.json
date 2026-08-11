@@ -1,8 +1,8 @@
 {
   "name": "goated-tizenbrew",
   "appName": "Goated",
-  "version": "0.4.1",
-  "description": "Netflix-style Samsung TV navigation and source acceleration for Goated.",
+  "version": "0.5.0",
+  "description": "TV remote navigation and playback compatibility for Goated on Tizen and Android TV.",
   "packageType": "mods",
   "websiteURL": "https://goated.cx/",
   "main": "main.js",
@@ -29,6 +29,9 @@
     "tizen",
     "tizenbrew",
     "samsung-tv",
+    "android-tv",
+    "google-tv",
+    "android",
     "smart-tv",
     "tv-navigation",
     "remote-control"
@@ -44,11 +47,12 @@
   ],
   "scripts": {
     "build": "npm pack --dry-run",
+    "check:versions": "node scripts/verify-versions.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "test": "node --test",
-    "validate": "npm run format:check && npm run lint && npm test && npm run build"
+    "validate": "npm run check:versions && npm run format:check && npm run lint && npm test && npm run build"
   },
   "engines": {
     "node": ">=20.19"

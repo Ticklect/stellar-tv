@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem with the Goated TizenBrew module
+description: Report a reproducible problem with the Tizen or Android TV build
 title: '[Bug]: '
 labels:
   - bug
@@ -9,38 +9,37 @@ body:
       value: |
         Thanks for reporting a problem. Search existing issues first and remove serial numbers, local IP addresses, cookies, signed media URLs, and other sensitive data.
 
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Samsung Tizen / TizenBrew
+        - Android TV / Google TV
+    validations:
+      required: true
+
   - type: input
     id: tv-model
     attributes:
-      label: Samsung TV model
+      label: TV or streaming-device model
       description: Give the model code, but never the serial number.
-      placeholder: UE50U8000…KXXU
     validations:
       required: true
 
   - type: input
-    id: tizen-version
+    id: platform-version
     attributes:
-      label: Tizen / TV software version
-      description: Enter the version shown by the TV, or write "Unknown".
-      placeholder: Unknown
+      label: Platform and host version
+      description: Include Tizen and TizenBrew versions, or Android and Android System WebView versions. Write "Unknown" where necessary.
     validations:
       required: true
 
   - type: input
-    id: tizenbrew-version
+    id: app-version
     attributes:
-      label: TizenBrew version
-      placeholder: 2.0.5
-    validations:
-      required: true
-
-  - type: input
-    id: module-version
-    attributes:
-      label: Module version
-      description: Include the exact installed GitHub identifier when possible.
-      placeholder: Ticklect/goated-tizenbrew@0.4.0
+      label: App or module version
+      description: Include the exact TizenBrew GitHub identifier or Android version name when possible.
     validations:
       required: true
 
@@ -48,11 +47,11 @@ body:
     id: steps
     attributes:
       label: Steps to reproduce
-      description: Provide a minimal numbered sequence starting from module launch.
+      description: Provide a minimal numbered sequence starting from app/module launch.
       placeholder: |
-        1. Launch Goated from TizenBrew
-        2. Press …
-        3. Observe …
+        1. Launch Goated TV
+        2. Press ...
+        3. Observe ...
     validations:
       required: true
 

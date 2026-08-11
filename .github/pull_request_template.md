@@ -11,17 +11,18 @@
 <!-- List exact automated commands and manual checks. Do not write only "tested". -->
 
 - [ ] `npm run validate`
+- [ ] `android-tv/gradlew testDebugUnitTest lintDebug assembleDebug` (for Android changes)
 - [ ] Module launch checked where applicable
 - [ ] Remote/navigation behavior checked where applicable
 - [ ] Playback/source behavior checked where applicable
 
-## TV / Tizen configurations tested
+## TV configurations tested
 
 <!-- Use "Not device-tested" when appropriate; do not imply compatibility. -->
 
-| TV model | Tizen version | TizenBrew version | Module version | Result |
-| -------- | ------------- | ----------------- | -------------- | ------ |
-|          |               |                   |                |        |
+| Platform | TV/device model | OS and host/WebView version | Build version | Result |
+| -------- | --------------- | --------------------------- | ------------- | ------ |
+|          |                 |                             |               |        |
 
 ## Breaking changes
 
