@@ -37,6 +37,7 @@
     "app/",
     "main.js",
     "LICENSE",
+    "LICENSE.GPL",
     "README.md",
     "CHANGELOG.md",
     "THIRD_PARTY_NOTICES.md"

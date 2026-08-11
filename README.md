@@ -158,7 +158,7 @@ Bug reports, device compatibility results, tests, and focused fixes are welcome.
 
 ## License
 
-Copyright (C) 2026 Ticklect contributors. Original code in this repository is licensed under the [GNU Lesser General Public License v3.0 only](LICENSE) (`LGPL-3.0-only`). The license does not grant rights to Goated's website, media, names, third-party APIs, Samsung/Tizen, TizenBrew, or assets owned by others. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Copyright (C) 2026 Ticklect contributors. Original code in this repository is licensed under the [GNU Lesser General Public License v3.0 only](LICENSE) (`LGPL-3.0-only`), incorporating the [GNU General Public License v3.0 terms](LICENSE.GPL). The license does not grant rights to Goated's website, media, names, third-party APIs, Samsung/Tizen, TizenBrew, or assets owned by others. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Disclaimer and project identity
 

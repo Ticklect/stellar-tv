@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Fixed
+
+- Split the canonical LGPLv3 and incorporated GPLv3 texts so GitHub can identify the repository license correctly while release packages include both documents.
+
 ## [0.4.1] - 2026-08-11
 
 ### Added
