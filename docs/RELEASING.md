@@ -20,6 +20,6 @@ The project uses Semantic Versioning. While the project is below `1.0.0`, increm
 
 Do not move or recreate an existing public tag. Do not publish an npm package until ownership, provenance, and the official package name are deliberately established.
 
-## Next release
+## Current release
 
-The first proper GitHub Release should be `v0.4.1`. It is a patch release over the working `v0.4.0` tag: runtime behavior remains compatible, while diagnostics, testability, licensing, and repository infrastructure improve. The existing tags should remain intact and can be referenced by the changelog even though no GitHub Release objects currently exist.
+`v0.4.1` is the first release prepared through this checklist. It is a patch release over `v0.4.0`: runtime behavior remains compatible, while diagnostics, testability, licensing, and repository infrastructure improve. Its physical-TV test is recorded in [COMPATIBILITY.md](COMPATIBILITY.md). Existing tags must remain intact.

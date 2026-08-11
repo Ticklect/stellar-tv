@@ -43,10 +43,10 @@ Follow the upstream [TizenBrew installation guide](https://github.com/reisxd/Tiz
 
 1. Open TizenBrew on the TV.
 2. Open the module manager and choose the GitHub source.
-3. Enter `Ticklect/goated-tizenbrew@0.4.0` for the latest version currently published on GitHub.
+3. Enter `Ticklect/goated-tizenbrew@0.4.1` for the current release.
 4. Confirm that **Goated** appears with the expected version, then launch it.
 
-This working tree prepares `0.4.1`. After that version is reviewed, tagged, and made available, use `Ticklect/goated-tizenbrew@0.4.1`. Pinning a version is recommended because it makes updates deliberate and avoids stale module-script identities in TizenBrew 2.0.5.
+Pinning a version is recommended because it makes updates deliberate and avoids stale module-script identities in TizenBrew 2.0.5.
 
 ### npm installation
 

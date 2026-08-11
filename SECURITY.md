@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Security fixes are provided for the latest published version when maintainers can reproduce and address the issue. Older versions are unsupported. During preparation of `0.4.1`, the latest published tag remains `0.4.0`.
+Security fixes are provided for the latest published version when maintainers can reproduce and address the issue. Older versions are unsupported.
 
 | Version                      | Supported   |
 | ---------------------------- | ----------- |

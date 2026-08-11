@@ -6,10 +6,10 @@ Statuses are evidence labels:
 - **Reported** — a user report exists, but the maintainers have not reproduced it.
 - **Untested** — no project-specific result is available.
 
-| Device / Tizen version                              | TizenBrew version | Status    | Notes                                                                                               |
-| --------------------------------------------------- | ----------------- | --------- | --------------------------------------------------------------------------------------------------- |
-| Samsung UE50U8000…KXXU / Tizen version not recorded | 2.0.5             | Confirmed | Remote navigation, title selection, source loading, and video playback confirmed with module 0.4.0. |
-| Other Samsung/Tizen configurations                  | Other versions    | Untested  | Do not infer support from the confirmed device. Reports are welcome.                                |
+| Device / Tizen version                              | TizenBrew version | Status    | Notes                                                                                                             |
+| --------------------------------------------------- | ----------------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
+| Samsung UE50U8000…KXXU / Tizen version not recorded | 2.0.5             | Confirmed | Remote navigation, title selection, source loading, and video playback confirmed with module 0.4.1 on 2026-08-11. |
+| Other Samsung/Tizen configurations                  | Other versions    | Untested  | Do not infer support from the confirmed device. Reports are welcome.                                              |
 
 ## What to include in a compatibility report
 

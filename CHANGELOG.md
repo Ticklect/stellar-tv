@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-08-11
+
 ### Added
 
 - Open-source governance, contribution, security, architecture, compatibility, roadmap, and release documentation.
@@ -67,7 +69,8 @@ This version corresponds to commit `b04665e`; it was not tagged in the repositor
 
 This version corresponds to commit `981fcdb`; it was not tagged in the repository.
 
-[Unreleased]: https://github.com/Ticklect/goated-tizenbrew/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/Ticklect/goated-tizenbrew/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.4.1
 [0.4.0]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.4.0
 [0.3.2]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.3.2
 [0.3.1]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.3.1
