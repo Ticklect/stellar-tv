@@ -1,6 +1,8 @@
 # Goated for TizenBrew
 
 [![License: LGPL-3.0-only](https://img.shields.io/badge/license-LGPL--3.0--only-blue.svg)](LICENSE)
+[![CI](https://github.com/Ticklect/goated-tizenbrew/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ticklect/goated-tizenbrew/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/Ticklect/goated-tizenbrew)](https://github.com/Ticklect/goated-tizenbrew/releases/latest)
 
 Goated for TizenBrew is a site-modification module that makes the Goated web interface easier to use on Samsung/Tizen TVs. It adds directional remote navigation, visible focus, player controls, and TV-specific performance work while leaving the website itself hosted and operated by Goated.
 
