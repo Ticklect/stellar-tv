@@ -50,7 +50,7 @@ No verified screenshots are currently checked in. Contributors may add real devi
 - Internet access from the TV to Goated and the media hosts selected by the website
 - A computer with ADB for sideloading a development or release APK
 
-Android TV hardware has not yet been physically validated for this project. The APK compiles, its pure navigation/key-policy tests pass, and launch/D-pad/Select/Back behavior has been validated on an Android TV API 36 emulator. Actual-device behavior must still be recorded before an Android release is described as confirmed.
+Android TV hardware has not yet been physically validated for this project. The APK compiles, its pure navigation/key-policy tests pass, and launch, D-pad, Select, Back, source loading, 1080p playback, fullscreen exit, and media-key behavior have been validated on an Android TV API 36 emulator. Actual-device behavior must still be recorded before Android hardware support is described as confirmed.
 
 See [compatibility](docs/COMPATIBILITY.md) for the evidence-based device matrix. The target website and source providers can change independently, so a previously working release may require maintenance.
 

@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
-- Native Kotlin Android TV / Google TV host under `android-tv/` with a secure fullscreen WebView, launcher metadata, D-pad/media-key mapping, fullscreen-video handling, audio focus, persistent sessions, and error recovery.
+- Native Kotlin Android TV / Google TV host under `android-tv/` with a secure fullscreen WebView, launcher metadata, D-pad/media-key mapping, fullscreen-video handling, persistent sessions, and error recovery.
 - Pure Android unit tests for remote-key mapping and trusted-navigation policy.
 - Cross-platform version verification and CI builds for the Android debug APK.
 - Tag-triggered workflow-artifact packaging for both TizenBrew and Android without automatic GitHub Release publication.
@@ -20,6 +20,7 @@ All notable changes to this project are documented in this file. The format is b
 
 - Inject the Android TV navigation layer as soon as a trusted page becomes visible, so first-load dialogs respond to the remote before all page resources finish loading.
 - Route Android 13+ predictive Back through a single callback, preventing duplicate Back events and accidental app exits after closing a dialog or returning from a title page.
+- Let Chromium own Android media audio focus, preventing a redundant native focus request from immediately pausing resumed video.
 - Split the canonical LGPLv3 and incorporated GPLv3 texts so GitHub can identify the repository license correctly while release packages include both documents.
 
 ## [0.4.1] - 2026-08-11
