@@ -66,7 +66,7 @@ Follow the upstream [TizenBrew installation guide](https://github.com/reisxd/Tiz
 
 1. Open TizenBrew on the TV.
 2. Open the module manager and choose the GitHub source.
-3. Enter `Ticklect/goated-tizenbrew@0.4.1` for the latest published Tizen release. Version `0.5.0` remains unreleased development code until both platform builds are reviewed.
+3. Enter `Ticklect/goated-tizenbrew@0.5.0` for the latest published release.
 4. Confirm that **Goated** appears with the expected version, then launch it.
 
 Pinning a version is recommended because it makes updates deliberate and avoids stale module-script identities in TizenBrew 2.0.5.
@@ -86,7 +86,13 @@ Using a new explicit version is important because TizenBrew 2.0.5 can retain an 
 
 ### Android TV / Google TV
 
-No Android APK has been publicly released yet. To build and sideload the development version:
+Download `goated-android-tv-v0.5.0.apk` from the [v0.5.0 release](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0), then enable developer options and USB/network debugging on the Android TV device. Connect with ADB, approve the debugging prompt shown by the TV, and install or update the signed APK:
+
+```sh
+adb install -r goated-android-tv-v0.5.0.apk
+```
+
+To build and sideload the development version instead:
 
 1. Install Android Studio or the Android SDK command-line tools, including Android SDK Platform 36 and Build Tools 36.0.0.
 2. From `android-tv/`, run `./gradlew assembleDebug` on macOS/Linux or `gradlew.bat assembleDebug` on Windows.
@@ -99,7 +105,7 @@ No Android APK has been publicly released yet. To build and sideload the develop
 
 5. Launch **Goated TV (Unofficial)** from the TV apps screen.
 
-Debug APKs are signed only with the local Android debug key and are intended for testing. Release-signing environment variables are documented in [android-tv/README.md](android-tv/README.md); signing keys and passwords must never be committed.
+Debug APKs are signed only with the local Android debug key and are intended for testing. Public release APKs use the project's permanent signing identity so later versions can update the installed app. Release-signing environment variables are documented in [android-tv/README.md](android-tv/README.md); signing keys and passwords must never be committed.
 
 ## Remote controls
 

@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-11
+
 ### Added
 
 - Native Kotlin Android TV / Google TV host under `android-tv/` with a secure fullscreen WebView, launcher metadata, D-pad/media-key mapping, fullscreen-video handling, persistent sessions, and error recovery.
@@ -88,7 +90,8 @@ This version corresponds to commit `b04665e`; it was not tagged in the repositor
 
 This version corresponds to commit `981fcdb`; it was not tagged in the repository.
 
-[Unreleased]: https://github.com/Ticklect/goated-tizenbrew/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/Ticklect/goated-tizenbrew/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0
 [0.4.1]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.4.1
 [0.4.0]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.4.0
 [0.3.2]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.3.2

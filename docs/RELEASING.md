@@ -23,6 +23,6 @@ Do not move or recreate an existing public tag. Do not publish an npm package un
 
 ## Current release
 
-`v0.4.1` is the first release prepared through this checklist. It is a patch release over `v0.4.0`: runtime behavior remains compatible, while diagnostics, testability, licensing, and repository infrastructure improve. Its physical-TV test is recorded in [COMPATIBILITY.md](COMPATIBILITY.md). Existing tags must remain intact.
+`v0.5.0` adds the native Android TV host while retaining the TizenBrew module and shared remote-navigation layer. Samsung/Tizen behavior was physically tested, while Android launch, navigation, playback, fullscreen exit, and media keys were validated on an Android TV API 36 emulator. Android hardware remains explicitly unverified in [COMPATIBILITY.md](COMPATIBILITY.md).
 
-Version `0.5.0` is currently unreleased development work. Do not tag or publish it until the existing Tizen behavior is rechecked and the Android APK has passed the documented physical-device smoke test.
+Existing public tags must remain intact. Every future Android release must use the same protected signing identity and a higher `versionCode` so it can update an installed APK.
