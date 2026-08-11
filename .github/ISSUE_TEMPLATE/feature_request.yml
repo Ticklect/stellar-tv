@@ -1,0 +1,56 @@
+name: Feature request
+description: Suggest a focused improvement to the module
+title: '[Feature]: '
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe a real TV-use problem. Features belonging to Goated or TizenBrew itself may be redirected upstream.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What is difficult or impossible today, and who is affected?
+    validations:
+      required: true
+
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Desired behavior
+      description: Describe the remote interaction or visible result you expect.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include current workarounds or simpler approaches you evaluated.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Relevant TV / Tizen / TizenBrew configuration
+      description: Optional, but useful for device-specific requests.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add redacted screenshots or examples if they clarify the proposal.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and the roadmap for this request.
+          required: true
+        - label: This request fits an independent TV-navigation module and does not require redistributing third-party content.
+          required: true

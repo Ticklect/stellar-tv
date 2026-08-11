@@ -1,7 +1,29 @@
+// SPDX-License-Identifier: LGPL-3.0-only
+// Copyright (C) 2026 Ticklect contributors
+
 (function () {
   'use strict';
 
   if (window.top !== window.self) return;
+
+  var MODULE_VERSION = '0.4.1';
+  var diagnostics = {
+    version: MODULE_VERSION,
+    lastError: null
+  };
+  window.__goatedTizenBrewDiagnostics = diagnostics;
+
+  function reportError(area, error) {
+    var message = error && error.message ? error.message : String(error || 'Unknown error');
+    diagnostics.lastError = {
+      area: area,
+      message: message,
+      timestamp: new Date().toISOString()
+    };
+    if (window.console && typeof window.console.warn === 'function') {
+      window.console.warn('[Goated TizenBrew][' + area + '] ' + message);
+    }
+  }
 
   var POW_K = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -57,10 +79,14 @@
     }
 
     var hashWords = [
-      (a + 0x6a09e667) >>> 0, (b + 0xbb67ae85) >>> 0,
-      (c + 0x3c6ef372) >>> 0, (d + 0xa54ff53a) >>> 0,
-      (e + 0x510e527f) >>> 0, (f + 0x9b05688c) >>> 0,
-      (g + 0x1f83d9ab) >>> 0, (h + 0x5be0cd19) >>> 0
+      (a + 0x6a09e667) >>> 0,
+      (b + 0xbb67ae85) >>> 0,
+      (c + 0x3c6ef372) >>> 0,
+      (d + 0xa54ff53a) >>> 0,
+      (e + 0x510e527f) >>> 0,
+      (f + 0x9b05688c) >>> 0,
+      (g + 0x1f83d9ab) >>> 0,
+      (h + 0x5be0cd19) >>> 0
     ];
     for (index = 0; index < difficulty; index++) {
       var hashWord = hashWords[Math.floor(index / 8)];
@@ -85,8 +111,14 @@
 
   function solveProofInWorkers(challenge, difficulty) {
     return new Promise(function (resolve, reject) {
-      var source = 'var POW_K=' + JSON.stringify(POW_K) + ';' +
-        powHashHasPrefix.toString() + ';(' + powWorkerMain.toString() + ')();';
+      var source =
+        'var POW_K=' +
+        JSON.stringify(POW_K) +
+        ';' +
+        powHashHasPrefix.toString() +
+        ';(' +
+        powWorkerMain.toString() +
+        ')();';
       var objectUrl;
       var workers = [];
       var settled = false;
@@ -96,7 +128,9 @@
         if (settled) return;
         settled = true;
         clearTimeout(timer);
-        workers.forEach(function (worker) { worker.terminate(); });
+        workers.forEach(function (worker) {
+          worker.terminate();
+        });
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         if (error) reject(error);
         else resolve(nonce);
@@ -114,7 +148,9 @@
               if (exhaustedWorkers === workerCount) finish(new Error(event.data.error));
             }
           };
-          worker.onerror = function () { finish(new Error('Background proof worker failed')); };
+          worker.onerror = function () {
+            finish(new Error('Background proof worker failed'));
+          };
           worker.postMessage({
             challenge: challenge,
             difficulty: difficulty,
@@ -123,7 +159,9 @@
             maximum: 5000000
           });
         }
-        timer = setTimeout(function () { finish(new Error('Background proof timed out')); }, 14000);
+        timer = setTimeout(function () {
+          finish(new Error('Background proof timed out'));
+        }, 14000);
       } catch (error) {
         finish(error);
       }
@@ -142,36 +180,56 @@
       var requestUrl = typeof input === 'string' ? input : (input && input.url) || '';
       if (/^https:\/\/api\.reallyfast\.xyz\/api\/challenge(?:\?|$)/.test(requestUrl)) {
         return nativeFetch(input, init).then(function (response) {
-          return response.clone().json().then(function (data) {
-            if (!data || !data.challenge || !data.difficulty) return response;
-            proofs[data.challenge] = solveProofInWorkers(data.challenge, Number(data.difficulty));
-            var accelerated = {};
-            Object.keys(data).forEach(function (key) { accelerated[key] = data[key]; });
-            accelerated.difficulty = 0;
-            return new Response(JSON.stringify(accelerated), {
-              status: response.status,
-              statusText: response.statusText,
-              headers: { 'Content-Type': 'application/json' }
+          return response
+            .clone()
+            .json()
+            .then(function (data) {
+              if (!data || !data.challenge || !data.difficulty) return response;
+              proofs[data.challenge] = solveProofInWorkers(data.challenge, Number(data.difficulty));
+              proofs[data.challenge].catch(function (error) {
+                reportError('source-proof', error);
+              });
+              var accelerated = {};
+              Object.keys(data).forEach(function (key) {
+                accelerated[key] = data[key];
+              });
+              accelerated.difficulty = 0;
+              return new Response(JSON.stringify(accelerated), {
+                status: response.status,
+                statusText: response.statusText,
+                headers: { 'Content-Type': 'application/json' }
+              });
+            })
+            .catch(function (error) {
+              reportError('challenge-response', error);
+              return response;
             });
-          }).catch(function () { return response; });
         });
       }
 
-      if (/^https:\/\/api\.reallyfast\.xyz\/api\/(?:resolve|subtitles)(?:\?|$)/.test(requestUrl) && init && init.body) {
+      if (
+        /^https:\/\/api\.reallyfast\.xyz\/api\/(?:resolve|subtitles)(?:\?|$)/.test(requestUrl) &&
+        init &&
+        init.body
+      ) {
         try {
           var body = JSON.parse(init.body);
           var proof = body.challenge && proofs[body.challenge];
           if (proof) {
             return proof.then(function (nonce) {
               var acceleratedInit = {};
-              Object.keys(init).forEach(function (key) { acceleratedInit[key] = init[key]; });
+              Object.keys(init).forEach(function (key) {
+                acceleratedInit[key] = init[key];
+              });
               body.nonce = nonce;
               acceleratedInit.body = JSON.stringify(body);
               delete proofs[body.challenge];
               return nativeFetch(input, acceleratedInit);
             });
           }
-        } catch (ignored) {}
+        } catch (error) {
+          reportError('source-request', error);
+        }
       }
       return nativeFetch(input, init);
     };
@@ -229,24 +287,31 @@
   }
 
   function activeScope() {
-    var dialogs = Array.prototype.slice.call(
-      document.querySelectorAll('[role="dialog"][aria-modal="true"]')
-    ).filter(isVisible);
+    var dialogs = Array.prototype.slice
+      .call(document.querySelectorAll('[role="dialog"][aria-modal="true"]'))
+      .filter(isVisible);
     if (dialogs.length) {
-      dialogs.sort(function (a, b) { return numericZIndex(a) - numericZIndex(b); });
+      dialogs.sort(function (a, b) {
+        return numericZIndex(a) - numericZIndex(b);
+      });
       return dialogs[dialogs.length - 1];
     }
 
     var overlaySelector = '[class*="fixed"], [style*="position: fixed"], [style*="position:fixed"]';
-    var fixedOverlays = Array.prototype.slice.call(document.body.querySelectorAll(overlaySelector)).filter(function (element) {
-      if (!isVisible(element)) return false;
-      var style = window.getComputedStyle(element);
-      if (style.position !== 'fixed' || numericZIndex(element) < 60) return false;
-      var rect = rectOf(element);
-      if (rect.width < window.innerWidth * 0.7 || rect.height < window.innerHeight * 0.7) return false;
-      return !!element.querySelector(SELECTOR);
+    var fixedOverlays = Array.prototype.slice
+      .call(document.body.querySelectorAll(overlaySelector))
+      .filter(function (element) {
+        if (!isVisible(element)) return false;
+        var style = window.getComputedStyle(element);
+        if (style.position !== 'fixed' || numericZIndex(element) < 60) return false;
+        var rect = rectOf(element);
+        if (rect.width < window.innerWidth * 0.7 || rect.height < window.innerHeight * 0.7)
+          return false;
+        return !!element.querySelector(SELECTOR);
+      });
+    fixedOverlays.sort(function (a, b) {
+      return numericZIndex(a) - numericZIndex(b);
     });
-    fixedOverlays.sort(function (a, b) { return numericZIndex(a) - numericZIndex(b); });
     return fixedOverlays.length ? fixedOverlays[fixedOverlays.length - 1] : document.body;
   }
 
@@ -261,7 +326,8 @@
     while (parent && parent !== scope && parent !== document.body) {
       if (parent.matches && parent.matches(SELECTOR) && isVisible(parent)) {
         var parentRect = rectOf(parent);
-        var sameBox = Math.abs(parentRect.left - elementRect.left) < 2 &&
+        var sameBox =
+          Math.abs(parentRect.left - elementRect.left) < 2 &&
           Math.abs(parentRect.top - elementRect.top) < 2 &&
           Math.abs(parentRect.width - elementRect.width) < 2 &&
           Math.abs(parentRect.height - elementRect.height) < 2;
@@ -281,12 +347,15 @@
     var found = Array.prototype.slice.call(scope.querySelectorAll(SELECTOR));
     if (scope.matches && scope.matches(SELECTOR)) found.unshift(scope);
     var items = found.filter(function (element, index, all) {
-      return isVisible(element) &&
+      return (
+        isVisible(element) &&
         !isUtilityControl(element) &&
         !hasInteractiveAncestor(element, scope) &&
-        all.indexOf(element) === index;
+        all.indexOf(element) === index
+      );
     });
-    if (state.candidateCache) state.candidateCache.set(scope, { version: state.domVersion, items: items });
+    if (state.candidateCache)
+      state.candidateCache.set(scope, { version: state.domVersion, items: items });
     return items;
   }
 
@@ -321,11 +390,19 @@
 
   function safeFocus(element, options) {
     if (!element || !isVisible(element)) return false;
-    if (!element.hasAttribute('tabindex') && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(element.tagName)) {
+    if (
+      !element.hasAttribute('tabindex') &&
+      !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(element.tagName)
+    ) {
       element.setAttribute('tabindex', '0');
     }
-    try { element.focus(options || { preventScroll: true }); }
-    catch (error) { try { element.focus(); } catch (ignored) {} }
+    try {
+      element.focus(options || { preventScroll: true });
+    } catch (error) {
+      try {
+        element.focus();
+      } catch (ignored) {}
+    }
     return document.activeElement === element || element.contains(document.activeElement);
   }
 
@@ -335,10 +412,14 @@
       var item = rectOf(element);
       var container = rectOf(rail);
       if (item.left < container.left + 24) rail.scrollLeft -= container.left + 80 - item.left;
-      else if (item.right > container.right - 24) rail.scrollLeft += item.right - container.right + 80;
+      else if (item.right > container.right - 24)
+        rail.scrollLeft += item.right - container.right + 80;
     }
-    try { element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' }); }
-    catch (error) { element.scrollIntoView(false); }
+    try {
+      element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+    } catch (error) {
+      element.scrollIntoView(false);
+    }
   }
 
   function setFocus(element, preservePreferredX) {
@@ -354,8 +435,13 @@
   }
 
   function focusedElement() {
-    if (state.current && isVisible(state.current) && state.current.classList.contains(FOCUS_CLASS)) return state.current;
-    if (document.activeElement && document.activeElement !== document.body && isVisible(document.activeElement)) {
+    if (state.current && isVisible(state.current) && state.current.classList.contains(FOCUS_CLASS))
+      return state.current;
+    if (
+      document.activeElement &&
+      document.activeElement !== document.body &&
+      isVisible(document.activeElement)
+    ) {
       state.current = document.activeElement;
       state.current.classList.add(FOCUS_CLASS);
       return state.current;
@@ -376,7 +462,12 @@
   function ensureFocus(force) {
     var scope = activeScope();
     if (scope !== state.previousScope) {
-      if (scope !== document.body && state.previousScope && state.current && state.previousScope.contains(state.current)) {
+      if (
+        scope !== document.body &&
+        state.previousScope &&
+        state.current &&
+        state.previousScope.contains(state.current)
+      ) {
         state.previousFocus = state.current;
       }
       state.previousScope = scope;
@@ -395,14 +486,20 @@
   }
 
   function railFor(element) {
-    return element && element.closest ? element.closest('.row-scroll, [class*="overflow-x-auto"]') : null;
+    return element && element.closest
+      ? element.closest('.row-scroll, [class*="overflow-x-auto"]')
+      : null;
   }
 
-  function railMove(current, direction, scope) {
+  function railMove(current, direction) {
     var rail = railFor(current);
     if (!rail) return false;
-    var items = candidates(rail).filter(function (element) { return railFor(element) === rail; });
-    items.sort(function (a, b) { return centerOf(a).x - centerOf(b).x; });
+    var items = candidates(rail).filter(function (element) {
+      return railFor(element) === rail;
+    });
+    items.sort(function (a, b) {
+      return centerOf(a).x - centerOf(b).x;
+    });
     var index = items.indexOf(current);
     if (index < 0) return false;
     var nextIndex = direction === 'left' ? index - 1 : index + 1;
@@ -414,15 +511,15 @@
     var currentRail = railFor(current);
     if (!currentRail) return false;
     var currentPoint = centerOf(currentRail);
-    var rails = Array.prototype.slice.call(
-      scope.querySelectorAll('.row-scroll, [class*="overflow-x-auto"]')
-    ).filter(function (rail, index, all) {
-      if (rail === currentRail || all.indexOf(rail) !== index) return false;
-      var rect = rectOf(rail);
-      if (rect.width < 2 || rect.height < 2) return false;
-      var delta = centerOf(rail).y - currentPoint.y;
-      return direction === 'down' ? delta > 8 : delta < -8;
-    });
+    var rails = Array.prototype.slice
+      .call(scope.querySelectorAll('.row-scroll, [class*="overflow-x-auto"]'))
+      .filter(function (rail, index, all) {
+        if (rail === currentRail || all.indexOf(rail) !== index) return false;
+        var rect = rectOf(rail);
+        if (rect.width < 2 || rect.height < 2) return false;
+        var delta = centerOf(rail).y - currentPoint.y;
+        return direction === 'down' ? delta > 8 : delta < -8;
+      });
     rails.sort(function (a, b) {
       return Math.abs(centerOf(a).y - currentPoint.y) - Math.abs(centerOf(b).y - currentPoint.y);
     });
@@ -438,7 +535,10 @@
         var rect = rectOf(element);
         if (rect.width < 2 || rect.height < 2) return;
         var distance = Math.abs(rect.left + rect.width / 2 - targetX);
-        if (distance < bestDistance) { best = element; bestDistance = distance; }
+        if (distance < bestDistance) {
+          best = element;
+          bestDistance = distance;
+        }
       });
       if (best) return setFocus(best, true);
     }
@@ -454,32 +554,25 @@
       return setFocus(preferredInitial(scope));
     }
 
-    if (direction === 'down' && isTextInput(current)) {
-      var primaryAction = items.filter(function (element) {
-        var label = (element.getAttribute('aria-label') || element.textContent || '').trim();
-        return label === 'Play';
-      })[0];
-      if (primaryAction) return setFocus(primaryAction);
-    }
+    var searchTarget = searchNavigationTarget(direction, current, items);
+    if (searchTarget) return setFocus(searchTarget);
 
-    if (direction === 'up') {
-      var currentLabel = (current.getAttribute('aria-label') || current.textContent || '').trim();
-      if (currentLabel === 'Play') {
-        var searchInput = items.filter(isTextInput)[0];
-        if (searchInput) return setFocus(searchInput);
-      }
-    }
-
-    if ((direction === 'up' || direction === 'down') && verticalRailMove(current, direction, scope)) {
+    if (
+      (direction === 'up' || direction === 'down') &&
+      verticalRailMove(current, direction, scope)
+    ) {
       return true;
     }
 
     if ((direction === 'left' || direction === 'right') && railFor(current)) {
-      return railMove(current, direction, scope);
+      return railMove(current, direction);
     }
 
     var origin = centerOf(current);
-    var targetX = (direction === 'up' || direction === 'down') && state.preferredX !== null ? state.preferredX : origin.x;
+    var targetX =
+      (direction === 'up' || direction === 'down') && state.preferredX !== null
+        ? state.preferredX
+        : origin.x;
     var best = null;
     var bestScore = Infinity;
     var currentRail = railFor(current);
@@ -487,24 +580,60 @@
     items.forEach(function (element) {
       if (element === current) return;
       var point = centerOf(element);
-      var dx = point.x - origin.x;
-      var dy = point.y - origin.y;
-      var primary;
-      var secondary;
-      if (direction === 'left') { primary = -dx; secondary = Math.abs(dy); }
-      else if (direction === 'right') { primary = dx; secondary = Math.abs(dy); }
-      else if (direction === 'up') { primary = -dy; secondary = Math.abs(point.x - targetX); }
-      else { primary = dy; secondary = Math.abs(point.x - targetX); }
-      if (primary <= 4) return;
-      if ((direction === 'up' || direction === 'down') && currentRail && railFor(element) === currentRail) return;
-
-      var axisPenalty = secondary * 3.25;
-      var distancePenalty = primary;
-      var score = distancePenalty + axisPenalty;
-      if (score < bestScore) { best = element; bestScore = score; }
+      if (
+        (direction === 'up' || direction === 'down') &&
+        currentRail &&
+        railFor(element) === currentRail
+      )
+        return;
+      var score = directionalScore(origin, point, direction, targetX);
+      if (score < bestScore) {
+        best = element;
+        bestScore = score;
+      }
     });
 
     return best ? setFocus(best, direction === 'up' || direction === 'down') : false;
+  }
+
+  function searchNavigationTarget(direction, current, items) {
+    if (direction === 'down' && isTextInput(current)) {
+      return (
+        items.filter(function (element) {
+          var label = (element.getAttribute('aria-label') || element.textContent || '').trim();
+          return label === 'Play';
+        })[0] || null
+      );
+    }
+
+    var currentLabel = (current.getAttribute('aria-label') || current.textContent || '').trim();
+    if (direction === 'up' && currentLabel === 'Play') {
+      return items.filter(isTextInput)[0] || null;
+    }
+    return null;
+  }
+
+  // A pure scoring function keeps the navigation geometry deterministic and testable.
+  function directionalScore(origin, point, direction, targetX) {
+    var dx = point.x - origin.x;
+    var dy = point.y - origin.y;
+    var primary;
+    var secondary;
+    if (direction === 'left') {
+      primary = -dx;
+      secondary = Math.abs(dy);
+    } else if (direction === 'right') {
+      primary = dx;
+      secondary = Math.abs(dy);
+    } else if (direction === 'up') {
+      primary = -dy;
+      secondary = Math.abs(point.x - targetX);
+    } else {
+      primary = dy;
+      secondary = Math.abs(point.x - targetX);
+    }
+    if (primary <= 4) return Infinity;
+    return primary + secondary * 3.25;
   }
 
   function videoElement() {
@@ -520,20 +649,26 @@
     if (!video) return;
     var rect = rectOf(video);
     try {
-      video.dispatchEvent(new MouseEvent('mousemove', {
-        bubbles: true,
-        clientX: rect.left + rect.width / 2,
-        clientY: rect.bottom - 30
-      }));
+      video.dispatchEvent(
+        new MouseEvent('mousemove', {
+          bubbles: true,
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.bottom - 30
+        })
+      );
     } catch (ignored) {}
   }
 
   function seek(seconds) {
     var video = videoElement();
     if (!video || !isFinite(video.duration)) return false;
-    video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + seconds));
+    video.currentTime = clampedSeekTime(video.currentTime, video.duration, seconds);
     wakePlayer();
     return true;
+  }
+
+  function clampedSeekTime(currentTime, duration, seconds) {
+    return Math.max(0, Math.min(duration, currentTime + seconds));
   }
 
   function togglePlayback(force) {
@@ -541,7 +676,11 @@
     if (!video) return false;
     if (force === 'play' || (force !== 'pause' && video.paused)) {
       var promise = video.play();
-      if (promise && promise.catch) promise.catch(function () {});
+      if (promise && promise.catch) {
+        promise.catch(function (error) {
+          reportError('video-playback', error);
+        });
+      }
     } else video.pause();
     wakePlayer();
     return true;
@@ -567,10 +706,20 @@
 
   function normalizedKey(event) {
     var codeMap = {
-      13: 'Enter', 37: 'ArrowLeft', 38: 'ArrowUp', 39: 'ArrowRight', 40: 'ArrowDown',
-      10009: 'Back', 412: 'MediaRewind', 413: 'MediaStop', 415: 'MediaPlay',
-      417: 'MediaFastForward', 19: 'MediaPause', 10232: 'MediaTrackPrevious',
-      10233: 'MediaTrackNext', 10252: 'MediaPlayPause'
+      13: 'Enter',
+      37: 'ArrowLeft',
+      38: 'ArrowUp',
+      39: 'ArrowRight',
+      40: 'ArrowDown',
+      10009: 'Back',
+      412: 'MediaRewind',
+      413: 'MediaStop',
+      415: 'MediaPlay',
+      417: 'MediaFastForward',
+      19: 'MediaPause',
+      10232: 'MediaTrackPrevious',
+      10233: 'MediaTrackNext',
+      10252: 'MediaPlayPause'
     };
     return codeMap[event.keyCode] || codeMap[event.which] || event.key || event.code || '';
   }
@@ -583,9 +732,14 @@
     var current = focusedElement();
     if (!current) return false;
     if (isTextInput(current)) return false;
-    if (current.matches('a, button, [role="button"], [role="link"]') || typeof current.onclick === 'function') {
+    if (
+      current.matches('a, button, [role="button"], [role="link"]') ||
+      typeof current.onclick === 'function'
+    ) {
       current.click();
-      setTimeout(function () { ensureFocus(false); }, 240);
+      setTimeout(function () {
+        ensureFocus(false);
+      }, 240);
       return true;
     }
     return false;
@@ -594,12 +748,16 @@
   function closeCurrentLayer() {
     var scope = activeScope();
     if (scope !== document.body) {
-      var close = Array.prototype.slice.call(scope.querySelectorAll('button, [role="button"]')).filter(function (button) {
-        var label = (button.getAttribute('aria-label') || button.textContent || '').trim();
-        return /^(Close|Cancel|Maybe later)$/i.test(label);
-      })[0];
+      var close = Array.prototype.slice
+        .call(scope.querySelectorAll('button, [role="button"]'))
+        .filter(function (button) {
+          var label = (button.getAttribute('aria-label') || button.textContent || '').trim();
+          return /^(Close|Cancel|Maybe later)$/i.test(label);
+        })[0];
       if (!close) {
-        var buttons = Array.prototype.slice.call(scope.querySelectorAll('button')).filter(isVisible);
+        var buttons = Array.prototype.slice
+          .call(scope.querySelectorAll('button'))
+          .filter(isVisible);
         close = buttons.filter(function (button) {
           var rect = rectOf(button);
           return rect.top < window.innerHeight * 0.3 && rect.right > window.innerWidth * 0.6;
@@ -607,23 +765,34 @@
       }
       if (close) {
         close.click();
-        setTimeout(function () { ensureFocus(false); }, 240);
+        setTimeout(function () {
+          ensureFocus(false);
+        }, 240);
         return true;
       }
     }
 
     var current = focusedElement();
-    if (isTextInput(current)) { current.blur(); ensureFocus(true); return true; }
+    if (isTextInput(current)) {
+      current.blur();
+      ensureFocus(true);
+      return true;
+    }
 
     if (isPlayerPage()) {
       var backButton = document.querySelector('button[aria-label="Back"]');
       if (backButton && isVisible(backButton)) {
         backButton.click();
-        setTimeout(function () { ensureFocus(false); }, 240);
+        setTimeout(function () {
+          ensureFocus(false);
+        }, 240);
         return true;
       }
     }
-    if (window.history.length > 1) { window.history.back(); return true; }
+    if (window.history.length > 1) {
+      window.history.back();
+      return true;
+    }
     try {
       if (window.tizen && tizen.application) {
         tizen.application.getCurrentApplication().exit();
@@ -636,7 +805,7 @@
   function playerArrow(key) {
     wakePlayer();
     var current = focusedElement();
-    var label = current ? (current.getAttribute('aria-label') || '') : '';
+    var label = current ? current.getAttribute('aria-label') || '' : '';
     var onPlayerControl = current && current.closest && current.closest('button');
 
     if ((key === 'ArrowLeft' || key === 'ArrowRight') && !onPlayerControl) {
@@ -703,18 +872,25 @@
   }
 
   function scheduleRefresh(records) {
-    if (records && records.some(function (record) {
-      if (record.type === 'attributes') {
-        return record.attributeName !== 'class' && record.attributeName !== 'style';
-      }
-      var changedNodes = Array.prototype.slice.call(record.addedNodes || []).concat(
-        Array.prototype.slice.call(record.removedNodes || [])
-      );
-      return changedNodes.some(function (node) {
-        return node.nodeType === 1 && ((node.matches && node.matches(SELECTOR)) ||
-          (node.querySelector && node.querySelector(SELECTOR)));
-      });
-    })) state.domVersion += 1;
+    if (
+      records &&
+      records.some(function (record) {
+        if (record.type === 'attributes') {
+          return record.attributeName !== 'class' && record.attributeName !== 'style';
+        }
+        var changedNodes = Array.prototype.slice
+          .call(record.addedNodes || [])
+          .concat(Array.prototype.slice.call(record.removedNodes || []));
+        return changedNodes.some(function (node) {
+          return (
+            node.nodeType === 1 &&
+            ((node.matches && node.matches(SELECTOR)) ||
+              (node.querySelector && node.querySelector(SELECTOR)))
+          );
+        });
+      })
+    )
+      state.domVersion += 1;
     if (state.mutationTimer) return;
     state.mutationTimer = setTimeout(function () {
       state.mutationTimer = null;
@@ -724,7 +900,8 @@
 
   function tuneImages(root) {
     if (!root || root.nodeType !== 1) return;
-    var images = root.tagName === 'IMG' ? [root] : Array.prototype.slice.call(root.querySelectorAll('img'));
+    var images =
+      root.tagName === 'IMG' ? [root] : Array.prototype.slice.call(root.querySelectorAll('img'));
     images.forEach(function (image) {
       image.decoding = 'async';
       if (image.getAttribute('fetchpriority') === 'high') return;
@@ -743,7 +920,11 @@
     tuneImages(document.documentElement);
     document.addEventListener('keydown', handleKeyDown, true);
     document.addEventListener('focusin', handleFocusIn, true);
-    window.addEventListener('popstate', function () { setTimeout(function () { ensureFocus(true); }, 250); });
+    window.addEventListener('popstate', function () {
+      setTimeout(function () {
+        ensureFocus(true);
+      }, 250);
+    });
     new MutationObserver(function (records) {
       records.forEach(function (record) {
         Array.prototype.forEach.call(record.addedNodes || [], tuneImages);
@@ -755,13 +936,18 @@
       attributes: true,
       attributeFilter: ['class', 'style', 'hidden', 'aria-hidden', 'aria-modal']
     });
-    setTimeout(function () { ensureFocus(true); }, 350);
+    setTimeout(function () {
+      ensureFocus(true);
+    }, 350);
     setTimeout(function () {
       if (!state.userInteracted) ensureFocus(true);
     }, 1600);
-    setInterval(function () { ensureFocus(false); }, 2000);
+    setInterval(function () {
+      ensureFocus(false);
+    }, 2000);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  if (document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 })();
