@@ -32,7 +32,6 @@ class MainActivity : Activity() {
     private lateinit var errorMessage: TextView
     private lateinit var retryButton: Button
     private lateinit var chromeClient: TvWebChromeClient
-    private lateinit var audioFocus: AudioFocusController
     private var webView: WebView? = null
     private var scriptsReady = false
     private var injectionInProgress = false
@@ -50,9 +49,6 @@ class MainActivity : Activity() {
         errorMessage = findViewById(R.id.error_message)
         retryButton = findViewById(R.id.retry_button)
 
-        audioFocus = AudioFocusController(this) {
-            dispatchRemoteKey(WebRemoteKey("MediaPause", 19))
-        }
         retryButton.setOnClickListener {
             hideError()
             webView?.reload() ?: createWebView(savedInstanceState)
@@ -188,10 +184,6 @@ class MainActivity : Activity() {
         }
         if (!scriptsReady) return super.dispatchKeyEvent(event)
 
-        when (remoteKey.key) {
-            "MediaPlay", "MediaPlayPause" -> audioFocus.request()
-            "MediaPause", "MediaStop" -> audioFocus.abandon()
-        }
         dispatchRemoteKey(remoteKey)
         return true
     }
@@ -319,7 +311,6 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
-        audioFocus.abandon()
         webView?.apply {
             stopLoading()
             webChromeClient = null

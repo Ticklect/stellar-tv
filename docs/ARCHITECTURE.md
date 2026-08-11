@@ -28,7 +28,7 @@ Android TV launcher
                     |
                     +--> generated copy of root main.js
                     +--> small native-to-web key dispatcher
-                    +--> fullscreen video and audio focus
+                    +--> fullscreen video using WebView media audio focus
 ```
 
 There is no backend, account system, database, analytics component, or bundled copy of the target website. The Tizen module has no runtime dependency, and the Android APK uses only Android platform APIs.
