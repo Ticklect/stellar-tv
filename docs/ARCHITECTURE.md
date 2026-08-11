@@ -2,7 +2,11 @@
 
 ## Overview
 
-Goated for TizenBrew is a single injected browser script, not a standalone hosted TV application. TizenBrew reads `package.json`, opens `websiteURL`, registers the requested media keys, and injects `main.js` into the page. The script exits in nested frames so only the top-level Goated document owns navigation and request interception.
+The repository has two independent platform hosts around one remote-navigation contract. It does not host, mirror, scrape, index, proxy, or bundle the target website or its media.
+
+TizenBrew reads the root `package.json`, opens `websiteURL`, registers the requested media keys, and injects root `main.js`. The script exits in nested frames so only the top-level Goated document owns navigation and request interception.
+
+The native Kotlin application under `android-tv/` opens the same live site in a fullscreen WebView. Its Gradle build copies root `main.js` into generated Android assets, preserving that proven script as the navigation source of truth without moving or duplicating the Tizen runtime file.
 
 ```text
 TizenBrew module metadata
@@ -15,9 +19,27 @@ TizenBrew module metadata
                     +--> video control
                     +--> rendering/performance tuning
                     +--> TV-only source-resolution worker
+
+Android TV launcher
+          |
+          +--> secure fullscreen WebView opens https://goated.cx/
+          |
+          +--> native Android remote events
+                    |
+                    +--> generated copy of root main.js
+                    +--> small native-to-web key dispatcher
+                    +--> fullscreen video and audio focus
 ```
 
-There is no runtime package dependency, backend, account system, database, analytics component, or bundled copy of the target website.
+There is no backend, account system, database, analytics component, or bundled copy of the target website. The Tizen module has no runtime dependency, and the Android APK uses only Android platform APIs.
+
+## Platform boundaries
+
+Root `package.json`, `main.js`, and `app/index.html` remain the TizenBrew contract. Android-specific source, resources, tests, and Gradle files live under `android-tv/`. A version check fails when `package.json`, the Tizen diagnostic version, and Android `versionName` differ.
+
+Android converts native key events into ordinary cancelable keyboard events understood by `main.js`. It uses native-to-web `evaluateJavascript`; it does not expose `addJavascriptInterface` or any privileged Java/Kotlin method to the page. Back first exits native fullscreen, then gives the shared page logic a chance to close a dialog or navigate, and finally leaves the activity when no web history remains.
+
+The Android WebView permits only HTTPS Goated pages in-app. Other HTTP(S) links are offered to an external browser, unsupported schemes are blocked, TLS errors are cancelled, and mixed content and file/content access are disabled. Cookies and DOM storage preserve normal website sessions, while third-party cookies and web permission requests remain disabled.
 
 ## Runtime entry and state
 

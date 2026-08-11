@@ -6,7 +6,7 @@
 
   if (window.top !== window.self) return;
 
-  var MODULE_VERSION = '0.4.1';
+  var MODULE_VERSION = '0.5.0';
   var diagnostics = {
     version: MODULE_VERSION,
     lastError: null

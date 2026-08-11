@@ -1,0 +1,121 @@
+name: Tag artifacts
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify tag and source
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Verify tagged version
+        id: version
+        run: |
+          VERSION="$(node -p 'require("./package.json").version')"
+          test "$GITHUB_REF_NAME" = "v$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Validate Tizen source
+        run: |
+          npm ci
+          npm run validate
+
+  tizen:
+    name: Package TizenBrew
+    needs: verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Create TizenBrew ZIP
+        run: |
+          mkdir -p dist
+          zip -r "dist/goated-tizenbrew-v${{ needs.verify.outputs.version }}.zip" \
+            package.json main.js app LICENSE LICENSE.GPL README.md CHANGELOG.md THIRD_PARTY_NOTICES.md
+
+      - name: Upload TizenBrew artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: goated-tizenbrew-v${{ needs.verify.outputs.version }}
+          path: dist/*.zip
+          if-no-files-found: error
+
+  android-tv:
+    name: Package Android TV
+    needs: verify
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_KEYSTORE_BASE64: ${{ secrets.GOATED_ANDROID_KEYSTORE_BASE64 }}
+      GOATED_ANDROID_STORE_PASSWORD: ${{ secrets.GOATED_ANDROID_STORE_PASSWORD }}
+      GOATED_ANDROID_KEY_ALIAS: ${{ secrets.GOATED_ANDROID_KEY_ALIAS }}
+      GOATED_ANDROID_KEY_PASSWORD: ${{ secrets.GOATED_ANDROID_KEY_PASSWORD }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ''
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Decode optional release keystore
+        if: env.RELEASE_KEYSTORE_BASE64 != ''
+        run: |
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/goated-release.jks"
+          echo "GOATED_ANDROID_KEYSTORE=$RUNNER_TEMP/goated-release.jks" >> "$GITHUB_ENV"
+
+      - name: Test, lint, and build release APK
+        working-directory: android-tv
+        run: ./gradlew testDebugUnitTest lintRelease assembleRelease
+
+      - name: Name Android artifact
+        run: |
+          mkdir -p dist
+          APK="$(find android-tv/app/build/outputs/apk/release -name '*.apk' -print -quit)"
+          test -n "$APK"
+          if [[ "$APK" == *-unsigned.apk ]]; then
+            NAME="goated-android-tv-v${{ needs.verify.outputs.version }}-unsigned.apk"
+          else
+            NAME="goated-android-tv-v${{ needs.verify.outputs.version }}.apk"
+          fi
+          cp "$APK" "dist/$NAME"
+
+      - name: Upload Android TV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: goated-android-tv-v${{ needs.verify.outputs.version }}
+          path: dist/*.apk
+          if-no-files-found: error
+
+# This workflow intentionally uploads run artifacts only. Publishing a GitHub
+# Release remains a manual, reviewed action after physical-device validation.

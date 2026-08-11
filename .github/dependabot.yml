@@ -14,3 +14,13 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+
+  - package-ecosystem: gradle
+    directory: /android-tv
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      android-build-tools:
+        patterns:
+          - '*'

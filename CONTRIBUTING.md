@@ -1,10 +1,10 @@
 # Contributing
 
-Thanks for helping make Goated for TizenBrew more reliable. Small, tested contributions are especially welcome.
+Thanks for helping make the Goated TV compatibility layer more reliable. Small, tested contributions are especially welcome.
 
 ## Report a bug
 
-Use the bug-report issue form. Search existing issues first, then include the TV model, Tizen version if known, TizenBrew version, module version, exact reproduction steps, expected and actual behavior, and redacted logs or screenshots. Never post credentials, cookies, signed media URLs, private network details, or source challenge data.
+Use the bug-report issue form. Search existing issues first, then include the platform, TV/device model, TizenBrew or Android/WebView version, app/module version, exact reproduction steps, expected and actual behavior, and redacted logs or screenshots. Never post credentials, cookies, signed media URLs, private network details, or source challenge data.
 
 Security vulnerabilities must follow [SECURITY.md](SECURITY.md), not the public bug tracker.
 
@@ -17,17 +17,18 @@ Use the feature-request form. Describe the user problem, desired behavior, alter
 1. Fork the repository and clone your fork.
 2. Create a focused branch such as `fix/player-back-button`, `feature/remote-key`, `docs/installation`, or `test/spatial-navigation`.
 3. Install development dependencies with `npm ci`.
-4. Make the smallest coherent change. Preserve compatibility with the TV browser and avoid unnecessary runtime dependencies.
+4. Make the smallest coherent change. Preserve the root TizenBrew contract and keep Android-specific code under `android-tv/`.
 5. Add or update meaningful tests for deterministic behavior.
-6. Run `npm run validate`.
+6. Run `npm run validate`. For Android changes, also run `android-tv/gradlew testDebugUnitTest lintDebug assembleDebug` (or `gradlew.bat` on Windows).
 7. Commit with a short imperative subject, for example `Fix focus restoration after dialog close`.
 8. Open a pull request using the template and link related issues.
 
 ## Code quality
 
 - Keep `main.js` understandable in older TV-browser environments; do not introduce unsupported syntax without compatibility evidence.
+- Keep Android's WebView boundary narrow: do not bypass TLS errors, enable unsafe file/mixed-content access, or expose a JavaScript interface.
 - Prefer pure, testable helpers for geometry, key mapping, and state calculations.
-- Explain non-obvious Samsung/Tizen behavior near the relevant code.
+- Explain non-obvious Samsung/Tizen or Android TV behavior near the relevant code.
 - Keep production logging limited to actionable failures and never log secrets or complete signed URLs.
 - Do not add generated bundles, caches, editor state, device logs, or `.env` files.
 - Do not add copied scripts, artwork, logos, fonts, or libraries unless their provenance and license are documented and compatible.

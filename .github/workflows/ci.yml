@@ -35,3 +35,64 @@ jobs:
 
       - name: Validate
         run: npm run validate
+
+  tizen-package:
+    name: Build TizenBrew ZIP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Read package version
+        id: version
+        run: |
+          VERSION="$(node -p 'require("./package.json").version')"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build TizenBrew ZIP
+        run: |
+          mkdir -p dist
+          zip -r "dist/goated-tizenbrew-v${{ steps.version.outputs.version }}.zip" \
+            package.json main.js app LICENSE LICENSE.GPL README.md CHANGELOG.md THIRD_PARTY_NOTICES.md
+
+      - name: Upload TizenBrew artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: goated-tizenbrew-v${{ steps.version.outputs.version }}
+          path: dist/*.zip
+          if-no-files-found: error
+
+  android-tv:
+    name: Build and test Android TV
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ''
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Build, test, and lint Android TV
+        working-directory: android-tv
+        run: ./gradlew testDebugUnitTest lintDebug assembleDebug
+
+      - name: Upload Android debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: goated-android-tv-debug
+          path: android-tv/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

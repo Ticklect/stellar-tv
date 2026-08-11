@@ -26,7 +26,7 @@ const browserGlobals = {
 
 export default defineConfig([
   {
-    ignores: ['node_modules/**', 'coverage/**']
+    ignores: ['node_modules/**', 'coverage/**', 'android-tv/**/build/**']
   },
   {
     files: ['main.js'],
@@ -45,13 +45,15 @@ export default defineConfig([
     }
   },
   {
-    files: ['eslint.config.mjs', 'test/**/*.mjs'],
+    files: ['eslint.config.mjs', 'test/**/*.mjs', 'scripts/**/*.mjs'],
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: 'module',
       globals: {
         Blob: 'readonly',
         URL: 'readonly',
+        process: 'readonly',
+        console: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',
         setTimeout: 'readonly'
@@ -61,6 +63,23 @@ export default defineConfig([
       'no-debugger': 'error',
       'no-undef': 'error',
       'no-unused-vars': ['error', { args: 'after-used' }]
+    }
+  },
+  {
+    files: ['android-tv/app/src/main/assets/*.js'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'script',
+      globals: {
+        KeyboardEvent: 'readonly',
+        document: 'readonly',
+        window: 'readonly'
+      }
+    },
+    rules: {
+      'no-debugger': 'error',
+      'no-undef': 'error',
+      'no-unused-vars': ['error', { args: 'after-used', caughtErrors: 'none' }]
     }
   }
 ]);

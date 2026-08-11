@@ -11,12 +11,22 @@ Statuses are evidence labels:
 | Samsung UE50U8000…KXXU / Tizen version not recorded | 2.0.5             | Confirmed | Remote navigation, title selection, source loading, and video playback confirmed with module 0.4.1 on 2026-08-11. |
 | Other Samsung/Tizen configurations                  | Other versions    | Untested  | Do not infer support from the confirmed device. Reports are welcome.                                              |
 
+## Android TV / Google TV
+
+| Device / Android version                          | Build             | Status    | Notes                                                                                                                                                                                               |
+| ------------------------------------------------- | ----------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local JVM policy tests                            | 0.5.0 development | Confirmed | Remote-key mapping and trusted-navigation policy pass locally. This is not a device test.                                                                                                           |
+| Android TV emulator / Android 16 (API 36), x86_64 | 0.5.0 development | Confirmed | Cold launch, first-load dialog focus, D-pad movement, Select opening a title page, and Back closing the dialog/returning from the title page were confirmed on 2026-08-11. Playback was not tested. |
+| Android TV / Google TV hardware, API 23+          | 0.5.0 development | Untested  | Debug APK compiles and lint passes; playback, fullscreen, codecs, DRM, and physical-remote behavior still require physical-device validation.                                                       |
+
+The minimum SDK is API 23. This is a packaging floor, not a claim that every device, WebView version, codec, media provider, or DRM configuration works.
+
 ## What to include in a compatibility report
 
-- Full TV model code, with serial number omitted
-- Tizen/software version shown by the TV
-- TizenBrew version
-- Module version or exact GitHub identifier
+- Full TV or streaming-device model, with serial number omitted
+- Tizen or Android/software version shown by the device
+- TizenBrew version or Android System WebView version, as applicable
+- Module identifier or Android APK version
 - Whether launch, arrows, OK, Back, media keys, source loading, and playback work
 - Any reproducible lag or navigation edge case
 

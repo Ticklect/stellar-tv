@@ -4,8 +4,22 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+
+- Native Kotlin Android TV / Google TV host under `android-tv/` with a secure fullscreen WebView, launcher metadata, D-pad/media-key mapping, fullscreen-video handling, audio focus, persistent sessions, and error recovery.
+- Pure Android unit tests for remote-key mapping and trusted-navigation policy.
+- Cross-platform version verification and CI builds for the Android debug APK.
+- Tag-triggered workflow-artifact packaging for both TizenBrew and Android without automatic GitHub Release publication.
+
+### Changed
+
+- Prepared synchronized Tizen and Android development metadata for version `0.5.0`.
+- Expanded architecture, compatibility, installation, signing, and third-party documentation for both platforms.
+
 ### Fixed
 
+- Inject the Android TV navigation layer as soon as a trusted page becomes visible, so first-load dialogs respond to the remote before all page resources finish loading.
+- Route Android 13+ predictive Back through a single callback, preventing duplicate Back events and accidental app exits after closing a dialog or returning from a title page.
 - Split the canonical LGPLv3 and incorporated GPLv3 texts so GitHub can identify the repository license correctly while release packages include both documents.
 
 ## [0.4.1] - 2026-08-11
