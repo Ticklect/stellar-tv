@@ -1,0 +1,108 @@
+name: Bug report
+description: Report a reproducible problem with the Goated TizenBrew module
+title: '[Bug]: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Search existing issues first and remove serial numbers, local IP addresses, cookies, signed media URLs, and other sensitive data.
+
+  - type: input
+    id: tv-model
+    attributes:
+      label: Samsung TV model
+      description: Give the model code, but never the serial number.
+      placeholder: UE50U8000…KXXU
+    validations:
+      required: true
+
+  - type: input
+    id: tizen-version
+    attributes:
+      label: Tizen / TV software version
+      description: Enter the version shown by the TV, or write "Unknown".
+      placeholder: Unknown
+    validations:
+      required: true
+
+  - type: input
+    id: tizenbrew-version
+    attributes:
+      label: TizenBrew version
+      placeholder: 2.0.5
+    validations:
+      required: true
+
+  - type: input
+    id: module-version
+    attributes:
+      label: Module version
+      description: Include the exact installed GitHub identifier when possible.
+      placeholder: Ticklect/goated-tizenbrew@0.4.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide a minimal numbered sequence starting from module launch.
+      placeholder: |
+        1. Launch Goated from TizenBrew
+        2. Press …
+        3. Observe …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or errors
+      description: Paste redacted errors or the redacted diagnostics object. Use a code block when possible.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or video
+      description: Optional. Drag files here after removing personal and device-identifying information.
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility
+      options:
+        - Every time
+        - Sometimes
+        - Once
+        - Unknown
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: I removed secrets, cookies, signed URLs, serial numbers, and private network details.
+          required: true
+        - label: This is not a sensitive security vulnerability.
+          required: true

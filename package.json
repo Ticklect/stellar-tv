@@ -1,7 +1,7 @@
 {
   "name": "goated-tizenbrew",
   "appName": "Goated",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Netflix-style Samsung TV navigation and source acceleration for Goated.",
   "packageType": "mods",
   "websiteURL": "https://goated.cx/",
@@ -16,5 +16,44 @@
     "MediaTrackNext",
     "MediaTrackPrevious"
   ],
-  "license": "UNLICENSED"
+  "license": "LGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ticklect/goated-tizenbrew.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ticklect/goated-tizenbrew/issues"
+  },
+  "homepage": "https://github.com/Ticklect/goated-tizenbrew#readme",
+  "keywords": [
+    "tizen",
+    "tizenbrew",
+    "samsung-tv",
+    "smart-tv",
+    "tv-navigation",
+    "remote-control"
+  ],
+  "files": [
+    "app/",
+    "main.js",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "npm pack --dry-run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "node --test",
+    "validate": "npm run format:check && npm run lint && npm test && npm run build"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "devDependencies": {
+    "eslint": "10.8.1",
+    "prettier": "3.9.6"
+  }
 }
