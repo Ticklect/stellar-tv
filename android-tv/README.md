@@ -16,16 +16,37 @@ On Windows, use `gradlew.bat`. The debug APK is written to `app/build/outputs/ap
 
 ## Install on an Android TV or Google TV
 
-The exact setting names vary by manufacturer. Keep the TV and computer on the same local network when using wireless ADB.
+### Recommended: Downloader app
 
-### 1. Enable developer options
+This is the easiest installation method and does not require a computer:
+
+1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
+2. Enter code **`6525707`**.
+3. Download the Goated Android TV APK.
+4. If Android asks for permission, allow Downloader to install unknown apps.
+5. Return to Downloader and install the APK.
+6. Launch **Goated TV (Unofficial)** from the TV's Apps screen.
+
+You can also open the clickable Downloader link: [https://go.aftvnews.com/6525707](https://go.aftvnews.com/6525707).
+
+> **Version note:** Code `6525707` currently points to the **v0.5.0** APK. The code must be updated when a new APK release is published.
+
+### Alternative: direct GitHub download
+
+Advanced users can download the signed [`goated-android-tv-v0.5.0.apk`](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.0/goated-android-tv-v0.5.0.apk) directly from [GitHub Release v0.5.0](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0).
+
+### Alternative: ADB installation
+
+ADB is intended for advanced users and developers. Download the signed release APK above before continuing. Setting names vary by manufacturer, and the TV and computer should be on the same local network when using wireless ADB.
+
+#### 1. Enable developer options
 
 1. Open the TV's **Settings**.
 2. Open **System > About** on Google TV, or **Device Preferences > About** on many Android TV devices.
 3. Highlight **Android TV OS build** or **Build**, then press OK seven times.
 4. Return to Settings and open **Developer options**.
 
-### 2. Enable debugging and connect ADB
+#### 2. Enable debugging and connect ADB
 
 For devices with **Wireless debugging**:
 
@@ -50,7 +71,18 @@ adb devices
 
 Port `5555` is not universal. Use the address and port shown by the TV or follow the device manufacturer's debugging instructions.
 
-### 3. Build and install
+#### 3. Install the release APK
+
+From the directory containing the downloaded APK, install or update it without clearing the saved session:
+
+```sh
+adb install -r goated-android-tv-v0.5.0.apk
+```
+
+The TV may display an installation confirmation. After installation, open **Goated TV (Unofficial)** from the TV's Apps screen.
+
+<details>
+<summary>Developer-only: build and install a debug APK</summary>
 
 From this `android-tv` directory, build the debug APK:
 
@@ -58,19 +90,23 @@ From this `android-tv` directory, build the debug APK:
 ./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
-On Windows, run `gradlew.bat testDebugUnitTest lintDebug assembleDebug` instead. Install or update the APK without clearing its saved session:
+On Windows, run `gradlew.bat testDebugUnitTest lintDebug assembleDebug`. Then install it with:
 
 ```sh
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-The TV may display an installation confirmation. After installation, open **Goated TV (Unofficial)** from the TV's Apps screen. A debug build can also be launched from ADB with:
+A debug build can also be launched from ADB with:
 
 ```sh
 adb shell monkey -p io.github.ticklect.goatedtv.debug -c android.intent.category.LEANBACK_LAUNCHER 1
 ```
 
-### 4. Test the remote
+Debug APKs use a local Android debug key and are for development testing only. They are not the recommended installation method and cannot update a differently signed public release APK.
+
+</details>
+
+#### 4. Test the remote
 
 Confirm that:
 
