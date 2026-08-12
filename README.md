@@ -48,7 +48,7 @@ No verified screenshots are currently checked in. Contributors may add real devi
 - An Android TV or Google TV device running Android 6.0 (API 23) or newer
 - A reasonably current Android System WebView implementation
 - Internet access from the TV to Goated and the media hosts selected by the website
-- A computer with ADB for sideloading a development or release APK
+- **Downloader by AFTVnews** for the recommended installation method
 
 Android TV hardware has not yet been physically validated for this project. The APK compiles, its pure navigation/key-policy tests pass, and launch, D-pad, Select, Back, source loading, 1080p playback, fullscreen exit, and media-key behavior have been validated on an Android TV API 36 emulator. Actual-device behavior must still be recorded before Android hardware support is described as confirmed.
 
@@ -86,28 +86,34 @@ Using a new explicit version is important because TizenBrew 2.0.5 can retain an 
 
 ### Android TV / Google TV
 
-[Download the signed Android TV APK](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.0/goated-android-tv-v0.5.0.apk) from the [v0.5.0 release](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0), then enable developer options and USB/network debugging on the Android TV device. Connect with ADB, approve the debugging prompt shown by the TV, and install or update the signed APK:
+#### Recommended: Downloader app
+
+This is the easiest installation method and does not require a computer:
+
+1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
+2. Enter code **`6525707`**.
+3. Download the Goated Android TV APK.
+4. If Android asks for permission, allow Downloader to install unknown apps.
+5. Return to Downloader and install the APK.
+6. Launch **Goated TV (Unofficial)** from the TV's Apps screen.
+
+You can also open the clickable Downloader link: [https://go.aftvnews.com/6525707](https://go.aftvnews.com/6525707).
+
+> **Version note:** Code `6525707` currently points to the **v0.5.0** APK. The code must be updated when a new APK release is published.
+
+#### Alternative: direct GitHub download
+
+Advanced users can download the signed [`goated-android-tv-v0.5.0.apk`](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.0/goated-android-tv-v0.5.0.apk) directly from [GitHub Release v0.5.0](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0).
+
+#### Alternative: ADB installation
+
+Developers and advanced users can install the downloaded release APK through ADB:
 
 ```sh
 adb install -r goated-android-tv-v0.5.0.apk
 ```
 
-To build and sideload the development version instead:
-
-1. Install Android Studio or the Android SDK command-line tools, including Android SDK Platform 36 and Build Tools 36.0.0.
-2. From `android-tv/`, run `./gradlew assembleDebug` on macOS/Linux or `gradlew.bat assembleDebug` on Windows.
-3. Enable developer options and USB/network debugging on the Android TV device.
-4. Connect with ADB, approve the debugging prompt shown by the TV, then run:
-
-   ```sh
-   adb install -r app/build/outputs/apk/debug/app-debug.apk
-   ```
-
-5. Launch **Goated TV (Unofficial)** from the TV apps screen.
-
-Debug APKs are signed only with the local Android debug key and are intended for testing. Public release APKs use the project's permanent signing identity so later versions can update the installed app. Release-signing environment variables are documented in [android-tv/README.md](android-tv/README.md); signing keys and passwords must never be committed.
-
-For device-specific developer-mode, wireless-pairing, launch, update, and troubleshooting steps, see the [complete Android TV installation guide](android-tv/README.md#install-on-an-android-tv-or-google-tv).
+For ADB setup, troubleshooting, and the collapsed developer/debug build instructions, see the [complete Android TV installation guide](android-tv/README.md#install-on-an-android-tv-or-google-tv).
 
 ## Remote controls
 
