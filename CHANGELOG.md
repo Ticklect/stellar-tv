@@ -4,6 +4,24 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-08-12
+
+### Added
+
+- Official goat artwork for density-specific legacy launcher icons, adaptive icons, and a dedicated 320 x 180 Android TV banner.
+- Unit coverage for TV viewport scaling, modal navigation scoring, and native subtitle-slider stepping and clamping.
+
+### Changed
+
+- Scale the Android WebView for readable 720p, 1080p, and 4K TV layouts without changing the Tizen or website presentation.
+- Prefer Play, Resume, or Watch as the initial Android TV focus target once delayed page content becomes available.
+
+### Fixed
+
+- Draw a high-contrast inset focus state on clipped poster surfaces, including Continue Watching cards.
+- Route Android remote events to the focused control so native range inputs respond to Left and Right, while Up and Down continue through the settings dialog.
+- Prefer the nearest settings row during vertical modal navigation and restore focus to the Settings button after the dialog closes.
+
 ## [0.5.0] - 2026-08-11
 
 ### Added
@@ -90,7 +108,8 @@ This version corresponds to commit `b04665e`; it was not tagged in the repositor
 
 This version corresponds to commit `981fcdb`; it was not tagged in the repository.
 
-[Unreleased]: https://github.com/Ticklect/goated-tizenbrew/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/Ticklect/goated-tizenbrew/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.1
 [0.5.0]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0
 [0.4.1]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.4.1
 [0.4.0]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.4.0

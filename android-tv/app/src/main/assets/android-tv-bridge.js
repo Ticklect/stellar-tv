@@ -26,7 +26,11 @@
       // Modern WebViews already expose the key name used by the shared navigation code.
     }
 
-    document.dispatchEvent(event);
+    var target =
+      document.activeElement && document.activeElement !== document.body
+        ? document.activeElement
+        : document;
+    target.dispatchEvent(event);
     return event.defaultPrevented;
   };
 })();

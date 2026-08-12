@@ -4,6 +4,14 @@ This directory contains the native Android TV / Google TV host. It opens the rea
 
 It does not contain a copy of the target site or media. The root Tizen/TizenBrew package remains independent and unchanged in structure.
 
+## TV behavior
+
+- The first available **Play**, **Resume**, or **Watch** action receives focus after startup.
+- D-pad focus uses a high-contrast outline, including an inset outline on clipped poster cards.
+- Left and Right adjust a focused subtitle slider by its declared step. Up and Down leave the slider and move to the adjacent setting.
+- Dialogs keep navigation inside the active layer and restore the previously focused control when they close.
+- Android-only viewport scaling keeps the desktop TV layout readable at 720p, 1080p, and 4K. It does not alter the Tizen module or the website outside this Android host.
+
 ## Build
 
 Install JDK 17 or newer plus Android SDK Platform 36 and Build Tools 36.0.0. Set `ANDROID_HOME`, `ANDROID_SDK_ROOT`, or create an untracked `local.properties` containing `sdk.dir=<path>`.
@@ -33,7 +41,7 @@ You can also open the clickable Downloader link: [https://go.aftvnews.com/652570
 
 ### Alternative: direct GitHub download
 
-Advanced users can download the signed [`goated-android-tv-v0.5.0.apk`](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.0/goated-android-tv-v0.5.0.apk) directly from [GitHub Release v0.5.0](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0).
+Advanced users can download the signed [`goated-android-tv-v0.5.1.apk`](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.1/goated-android-tv-v0.5.1.apk) directly from [GitHub Release v0.5.1](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.1).
 
 ### Alternative: ADB installation
 
@@ -76,7 +84,7 @@ Port `5555` is not universal. Use the address and port shown by the TV or follow
 From the directory containing the downloaded APK, install or update it without clearing the saved session:
 
 ```sh
-adb install -r goated-android-tv-v0.5.0.apk
+adb install -r goated-android-tv-v0.5.1.apk
 ```
 
 The TV may display an installation confirmation. After installation, open **Goated TV (Unofficial)** from the TV's Apps screen.

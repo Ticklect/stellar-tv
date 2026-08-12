@@ -6,7 +6,7 @@
 
   if (window.top !== window.self) return;
 
-  var MODULE_VERSION = '0.5.0';
+  var MODULE_VERSION = '0.5.1';
   var diagnostics = {
     version: MODULE_VERSION,
     lastError: null
@@ -239,6 +239,8 @@
 
   var STYLE_ID = 'goated-tv-navigation-style';
   var FOCUS_CLASS = 'goated-tv-focused';
+  var FOCUS_SURFACE_CLASS = 'goated-tv-focus-surface';
+  var isAndroidTv = /GoatedAndroidTV/i.test(navigator.userAgent || '');
   var SELECTOR = [
     'a[href]',
     'button:not([disabled])',
@@ -259,6 +261,7 @@
     mutationTimer: null,
     domVersion: 0,
     candidateCache: typeof WeakMap === 'function' ? new WeakMap() : null,
+    focusSurface: null,
     userInteracted: false,
     started: false
   };
@@ -370,8 +373,22 @@
       '  box-shadow: 0 0 0 3px rgba(0,0,0,.85), 0 14px 35px rgba(0,0,0,.65) !important;',
       '  border-radius: 8px;',
       '}',
+      'html.goated-android-tv .' + FOCUS_SURFACE_CLASS + ' {',
+      '  outline: 4px solid #fff !important;',
+      '  outline-offset: -4px !important;',
+      '  box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 7px rgba(0,0,0,.78), 0 10px 28px rgba(0,0,0,.7) !important;',
+      '  filter: brightness(1.08);',
+      '}',
       'input.' + FOCUS_CLASS + ', textarea.' + FOCUS_CLASS + ', select.' + FOCUS_CLASS + ' {',
       '  transform: none !important;',
+      '}',
+      'html.goated-android-tv input[type="range"] {',
+      '  min-width: min(42vw, 360px);',
+      '  min-height: 28px;',
+      '}',
+      'html.goated-android-tv input[type="range"].' + FOCUS_CLASS + ' {',
+      '  outline-offset: 5px !important;',
+      '  box-shadow: 0 0 0 3px rgba(0,0,0,.9), 0 0 18px rgba(255,255,255,.55) !important;',
       '}',
       '.' + FOCUS_CLASS + ' img { filter: brightness(1.08); }',
       'html.goated-tv-mode, html.goated-tv-mode * { scroll-behavior: auto !important; }',
@@ -383,6 +400,13 @@
       'html.goated-tv-mode .row-scroll, html.goated-tv-mode [class*="overflow-x-auto"] {',
       '  content-visibility: auto;',
       '  contain-intrinsic-size: auto 280px;',
+      '}',
+      '@media (min-width: 960px) and (orientation: landscape) {',
+      '  html.goated-android-tv section[class~="h-[90vh]"] {',
+      '    height: min(68dvh, 900px) !important;',
+      '    min-height: min(420px, 68dvh) !important;',
+      '    max-height: 900px !important;',
+      '  }',
       '}'
     ].join('\n');
     (document.head || document.documentElement).appendChild(style);
@@ -406,6 +430,42 @@
     return document.activeElement === element || element.contains(document.activeElement);
   }
 
+  function isSlider(element) {
+    return (
+      !!element &&
+      ((element.tagName === 'INPUT' && element.type === 'range') ||
+        element.getAttribute('role') === 'slider')
+    );
+  }
+
+  function focusSurfaceFor(element) {
+    if (!isAndroidTv || !element || isSlider(element)) return null;
+    var elementRect = rectOf(element);
+    var children = Array.prototype.slice.call(element.children || []);
+    return (
+      children.filter(function (child) {
+        if (!isVisible(child)) return false;
+        var childRect = rectOf(child);
+        var nearlyFullSize =
+          childRect.width >= elementRect.width * 0.82 &&
+          childRect.height >= elementRect.height * 0.72;
+        if (!nearlyFullSize) return false;
+        var style = window.getComputedStyle(child);
+        return (
+          style.overflow === 'hidden' ||
+          style.overflow === 'clip' ||
+          !!child.querySelector('img, video')
+        );
+      })[0] || null
+    );
+  }
+
+  function clearFocusDecoration() {
+    if (state.current) state.current.classList.remove(FOCUS_CLASS);
+    if (state.focusSurface) state.focusSurface.classList.remove(FOCUS_SURFACE_CLASS);
+    state.focusSurface = null;
+  }
+
   function scrollToElement(element) {
     var rail = railFor(element);
     if (rail) {
@@ -425,9 +485,11 @@
   function setFocus(element, preservePreferredX) {
     if (!element || !isVisible(element)) return false;
     var previousPreferredX = state.preferredX;
-    if (state.current && state.current !== element) state.current.classList.remove(FOCUS_CLASS);
+    if (state.current !== element) clearFocusDecoration();
     state.current = element;
     element.classList.add(FOCUS_CLASS);
+    state.focusSurface = focusSurfaceFor(element);
+    if (state.focusSurface) state.focusSurface.classList.add(FOCUS_SURFACE_CLASS);
     safeFocus(element, { preventScroll: true });
     scrollToElement(element);
     state.preferredX = preservePreferredX ? previousPreferredX : centerOf(element).x;
@@ -454,7 +516,7 @@
     if (!items.length) return null;
     var play = items.filter(function (element) {
       var label = (element.getAttribute('aria-label') || element.textContent || '').trim();
-      return label === 'Play' || label === 'Maybe later';
+      return /^(Play|Resume\b|Watch\b|Maybe later$)/i.test(label);
     })[0];
     return play || items[0];
   }
@@ -586,7 +648,9 @@
         railFor(element) === currentRail
       )
         return;
-      var score = directionalScore(origin, point, direction, targetX);
+      var secondaryWeight =
+        scope !== document.body && (direction === 'up' || direction === 'down') ? 0.55 : 3.25;
+      var score = directionalScore(origin, point, direction, targetX, secondaryWeight);
       if (score < bestScore) {
         best = element;
         bestScore = score;
@@ -614,7 +678,7 @@
   }
 
   // A pure scoring function keeps the navigation geometry deterministic and testable.
-  function directionalScore(origin, point, direction, targetX) {
+  function directionalScore(origin, point, direction, targetX, secondaryWeight) {
     var dx = point.x - origin.x;
     var dy = point.y - origin.y;
     var primary;
@@ -633,7 +697,7 @@
       secondary = Math.abs(point.x - targetX);
     }
     if (primary <= 4) return Infinity;
-    return primary + secondary * 3.25;
+    return primary + secondary * (secondaryWeight === undefined ? 3.25 : secondaryWeight);
   }
 
   function videoElement() {
@@ -704,6 +768,58 @@
     return false;
   }
 
+  function sliderValueAfterStep(current, minimum, maximum, step, direction) {
+    var value = Number(current);
+    var min = Number(minimum);
+    var max = Number(maximum);
+    var amount = Number(step);
+    if (!isFinite(value)) value = 0;
+    if (!isFinite(min)) min = 0;
+    if (!isFinite(max)) max = 100;
+    if (!isFinite(amount) || amount <= 0) amount = Math.max((max - min) / 100, 1);
+    var precision = Math.max(
+      String(amount).split('.')[1] ? String(amount).split('.')[1].length : 0,
+      String(value).split('.')[1] ? String(value).split('.')[1].length : 0
+    );
+    var next = value + (direction === 'left' ? -amount : amount);
+    return Number(Math.max(min, Math.min(max, next)).toFixed(precision));
+  }
+
+  function adjustSlider(element, direction) {
+    if (!isSlider(element)) return false;
+    if (element.tagName !== 'INPUT' || element.type !== 'range') {
+      var forwarded = new window.KeyboardEvent('keydown', {
+        key: direction === 'left' ? 'ArrowLeft' : 'ArrowRight',
+        bubbles: true,
+        cancelable: true
+      });
+      try {
+        Object.defineProperty(forwarded, '__goatedTvSliderForwarded', { value: true });
+      } catch (ignored) {}
+      element.dispatchEvent(forwarded);
+      return true;
+    }
+
+    var next = sliderValueAfterStep(
+      element.value,
+      element.min === '' ? 0 : element.min,
+      element.max === '' ? 100 : element.max,
+      element.step === '' || element.step === 'any' ? 1 : element.step,
+      direction
+    );
+    if (String(next) === String(element.value)) return true;
+    var valueDescriptor = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      'value'
+    );
+    var valueSetter = valueDescriptor && valueDescriptor.set;
+    if (valueSetter) valueSetter.call(element, String(next));
+    else element.value = String(next);
+    element.dispatchEvent(new window.Event('input', { bubbles: true }));
+    element.dispatchEvent(new window.Event('change', { bubbles: true }));
+    return true;
+  }
+
   function normalizedKey(event) {
     var codeMap = {
       13: 'Enter',
@@ -731,7 +847,17 @@
   function activateFocused() {
     var current = focusedElement();
     if (!current) return false;
-    if (isTextInput(current)) return false;
+    if (isTextInput(current)) {
+      if (
+        current.tagName === 'SELECT' ||
+        (current.tagName === 'INPUT' &&
+          /^(button|checkbox|color|radio|reset|submit)$/.test(current.type))
+      ) {
+        current.click();
+        return true;
+      }
+      return false;
+    }
     if (
       current.matches('a, button, [role="button"], [role="link"]') ||
       typeof current.onclick === 'function'
@@ -824,6 +950,7 @@
   }
 
   function handleKeyDown(event) {
+    if (event.__goatedTvSliderForwarded) return;
     var key = normalizedKey(event);
     if (!key) return;
     state.userInteracted = true;
@@ -844,6 +971,12 @@
 
     if (/^Arrow(Up|Down|Left|Right)$/.test(key)) {
       var active = focusedElement();
+      if (isAndroidTv && isSlider(active) && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+        adjustSlider(active, key === 'ArrowLeft' ? 'left' : 'right');
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       if (isTextInput(active) && (key === 'ArrowLeft' || key === 'ArrowRight')) return;
       if (isPlayerPage()) playerArrow(key);
       else spatialMove(key.slice(5).toLowerCase());
@@ -865,9 +998,11 @@
   function handleFocusIn(event) {
     var target = event.target;
     if (!target || target === document.body || !isVisible(target)) return;
-    if (state.current && state.current !== target) state.current.classList.remove(FOCUS_CLASS);
+    if (state.current !== target) clearFocusDecoration();
     state.current = target;
     target.classList.add(FOCUS_CLASS);
+    state.focusSurface = focusSurfaceFor(target);
+    if (state.focusSurface) state.focusSurface.classList.add(FOCUS_SURFACE_CLASS);
     state.preferredX = centerOf(target).x;
   }
 
@@ -894,7 +1029,7 @@
     if (state.mutationTimer) return;
     state.mutationTimer = setTimeout(function () {
       state.mutationTimer = null;
-      ensureFocus(false);
+      ensureFocus(!state.userInteracted);
     }, 180);
   }
 
@@ -916,6 +1051,7 @@
     if (state.started) return;
     state.started = true;
     document.documentElement.classList.add('goated-tv-mode');
+    if (isAndroidTv) document.documentElement.classList.add('goated-android-tv');
     addStyle();
     tuneImages(document.documentElement);
     document.addEventListener('keydown', handleKeyDown, true);
@@ -942,6 +1078,9 @@
     setTimeout(function () {
       if (!state.userInteracted) ensureFocus(true);
     }, 1600);
+    setTimeout(function () {
+      if (!state.userInteracted) ensureFocus(true);
+    }, 4000);
     setInterval(function () {
       ensureFocus(false);
     }, 2000);

@@ -16,6 +16,7 @@ function loadModuleInternals() {
       powHashHasPrefix: powHashHasPrefix,
       preferredInitial: preferredInitial,
       searchNavigationTarget: searchNavigationTarget,
+      sliderValueAfterStep: sliderValueAfterStep,
       state: state
     };
   `;
@@ -105,11 +106,28 @@ test('penalizes off-axis spatial-navigation candidates', () => {
   assert.ok(aligned < diagonal);
 });
 
+test('can favor the nearest modal row over a distant aligned control', () => {
+  const { directionalScore } = moduleUnderTest;
+  const origin = { x: 980, y: 630 };
+  const nextRow = directionalScore(origin, { x: 1450, y: 690 }, 'down', 980, 0.55);
+  const distant = directionalScore(origin, { x: 1040, y: 990 }, 'down', 980, 0.55);
+  assert.ok(nextRow < distant);
+});
+
 test('clamps seek targets to the media duration', () => {
   const { clampedSeekTime } = moduleUnderTest;
   assert.equal(clampedSeekTime(10, 100, -15), 0);
   assert.equal(clampedSeekTime(50, 100, 15), 65);
   assert.equal(clampedSeekTime(95, 100, 15), 100);
+});
+
+test('steps TV sliders using their declared range and precision', () => {
+  const { sliderValueAfterStep } = moduleUnderTest;
+  assert.equal(sliderValueAfterStep(40, 0, 100, 5, 'right'), 45);
+  assert.equal(sliderValueAfterStep(40, 0, 100, 5, 'left'), 35);
+  assert.equal(sliderValueAfterStep(0, -40, 40, 0.5, 'left'), -0.5);
+  assert.equal(sliderValueAfterStep(100, 0, 100, 5, 'right'), 100);
+  assert.equal(sliderValueAfterStep(0, 0, 100, 5, 'left'), 0);
 });
 
 test('prefers the primary Play action for initial focus', () => {
