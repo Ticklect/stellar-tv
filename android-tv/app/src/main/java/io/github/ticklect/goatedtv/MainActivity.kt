@@ -89,6 +89,9 @@ class MainActivity : Activity() {
             javaScriptEnabled = true
             domStorageEnabled = true
             mediaPlaybackRequiresUserGesture = false
+            textZoom = 100
+            builtInZoomControls = false
+            displayZoomControls = false
             allowFileAccess = false
             allowContentAccess = false
             @Suppress("DEPRECATION")
@@ -101,6 +104,12 @@ class MainActivity : Activity() {
             setGeolocationEnabled(false)
             userAgentString = "$userAgentString GoatedAndroidTV/${BuildConfig.VERSION_NAME}"
         }
+        browser.setInitialScale(
+            TvViewport.initialScalePercent(
+                resources.displayMetrics.widthPixels,
+                resources.displayMetrics.density,
+            ),
+        )
 
         CookieManager.getInstance().apply {
             setAcceptCookie(true)
