@@ -104,13 +104,6 @@ class MainActivity : Activity() {
             setGeolocationEnabled(false)
             userAgentString = "$userAgentString GoatedAndroidTV/${BuildConfig.VERSION_NAME}"
         }
-        browser.setInitialScale(
-            TvViewport.initialScalePercent(
-                resources.displayMetrics.widthPixels,
-                resources.displayMetrics.density,
-            ),
-        )
-
         CookieManager.getInstance().apply {
             setAcceptCookie(true)
             setAcceptThirdPartyCookies(browser, false)

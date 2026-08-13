@@ -1,6 +1,7 @@
 name: Tag artifacts
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -29,7 +30,9 @@ jobs:
         id: version
         run: |
           VERSION="$(node -p 'require("./package.json").version')"
-          test "$GITHUB_REF_NAME" = "v$VERSION"
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            test "$GITHUB_REF_NAME" = "v$VERSION"
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Validate Tizen source
