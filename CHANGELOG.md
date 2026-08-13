@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+
+- Broader Android TV remote mappings for controller Select/B/Start, keyboard Space/Escape, headset play/pause, alternate media seek/close keys, Menu, Info, and Captions.
+- Focus discovery for ARIA switches, tabs, menu items, options, checkboxes, radios, comboboxes, and editable controls.
+- Remote adjustment for native select controls, including disabled-option skipping and edge clamping.
+
+### Fixed
+
+- Restore v0.5.0's device-default Android WebView scaling. The density-derived zoom added in v0.5.1 shrank the entire site—including player controls—far below a readable size on some real TVs.
+- Forward mapped Android keys back to the WebView when the TV layer does not handle them, preserving native control behavior.
+- Register only media and shortcut keys that a Samsung TV reports as supported, with per-key fallback if batch registration fails.
+
 ## [0.5.1] - 2026-08-12
 
 ### Added

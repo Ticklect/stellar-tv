@@ -10,7 +10,7 @@ It does not contain a copy of the target site or media. The root Tizen/TizenBrew
 - D-pad focus uses a high-contrast outline, including an inset outline on clipped poster cards.
 - Left and Right adjust a focused subtitle slider by its declared step. Up and Down leave the slider and move to the adjacent setting.
 - Dialogs keep navigation inside the active layer and restore the previously focused control when they close.
-- Android-only viewport scaling keeps the desktop TV layout readable at 720p, 1080p, and 4K. It does not alter the Tizen module or the website outside this Android host.
+- Android leaves WebView scaling under the page and device defaults used by v0.5.0, while a targeted Android-only hero-height rule keeps the first content rows at a sensible position. It does not alter the Tizen module or the website outside this Android host.
 
 ## Build
 
@@ -123,6 +123,9 @@ Confirm that:
 - Back closes an open dialog or returns to the previous page before leaving the app.
 - Play/Pause, Rewind, and Fast Forward work after a video starts.
 - Fullscreen video opens and exits correctly.
+- Left/Right adjusts sliders and select controls; Up/Down leaves the control and continues through settings.
+- Controller A/Select/Space activates, while controller B/Escape behaves like Back.
+- Volume, power, TV input, channel, guide, and voice-assistant keys remain controlled by Android or the television.
 
 ### Troubleshooting
 

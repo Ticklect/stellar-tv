@@ -11,12 +11,16 @@ function loadModuleInternals() {
     globalThis.__internals = {
       candidates: candidates,
       clampedSeekTime: clampedSeekTime,
+      choiceIndexAfterStep: choiceIndexAfterStep,
+      controlLabel: controlLabel,
       directionalScore: directionalScore,
+      isSideDrawerRect: isSideDrawerRect,
       normalizedKey: normalizedKey,
       powHashHasPrefix: powHashHasPrefix,
       preferredInitial: preferredInitial,
       searchNavigationTarget: searchNavigationTarget,
       sliderValueAfterStep: sliderValueAfterStep,
+      supportedRemoteKeys: supportedRemoteKeys,
       state: state
     };
   `;
@@ -83,9 +87,24 @@ test('normalizes Samsung key codes and standard browser keys', () => {
   const { normalizedKey } = moduleUnderTest;
   assert.equal(normalizedKey({ keyCode: 10009 }), 'Back');
   assert.equal(normalizedKey({ keyCode: 415 }), 'MediaPlay');
+  assert.equal(normalizedKey({ keyCode: 457 }), 'Info');
+  assert.equal(normalizedKey({ keyCode: 10221 }), 'Captions');
+  assert.equal(normalizedKey({ keyCode: 32 }), ' ');
   assert.equal(normalizedKey({ which: 40 }), 'ArrowDown');
   assert.equal(normalizedKey({ key: 'Enter' }), 'Enter');
   assert.equal(normalizedKey({ code: 'NumpadEnter' }), 'NumpadEnter');
+});
+
+test('uses rendered control text so multi-line player labels remain matchable', () => {
+  const { controlLabel } = moduleUnderTest;
+  assert.equal(
+    controlLabel({
+      getAttribute: () => '',
+      innerText: 'Subtitles\nOff',
+      textContent: 'SubtitlesOff'
+    }),
+    'Subtitles\nOff'
+  );
 });
 
 test('scores only candidates in the requested direction', () => {
@@ -114,6 +133,19 @@ test('can favor the nearest modal row over a distant aligned control', () => {
   assert.ok(nextRow < distant);
 });
 
+test('recognizes edge-mounted TV drawers without matching centered or full-screen layers', () => {
+  const { isSideDrawerRect } = moduleUnderTest;
+  assert.equal(
+    isSideDrawerRect({ left: 577, right: 920, width: 343, height: 459 }, 960, 540),
+    true
+  );
+  assert.equal(
+    isSideDrawerRect({ left: 300, right: 643, width: 343, height: 459 }, 960, 540),
+    false
+  );
+  assert.equal(isSideDrawerRect({ left: 0, right: 960, width: 960, height: 540 }, 960, 540), false);
+});
+
 test('clamps seek targets to the media duration', () => {
   const { clampedSeekTime } = moduleUnderTest;
   assert.equal(clampedSeekTime(10, 100, -15), 0);
@@ -128,6 +160,26 @@ test('steps TV sliders using their declared range and precision', () => {
   assert.equal(sliderValueAfterStep(0, -40, 40, 0.5, 'left'), -0.5);
   assert.equal(sliderValueAfterStep(100, 0, 100, 5, 'right'), 100);
   assert.equal(sliderValueAfterStep(0, 0, 100, 5, 'left'), 0);
+});
+
+test('steps select controls while skipping disabled options and clamping at the ends', () => {
+  const { choiceIndexAfterStep } = moduleUnderTest;
+  assert.equal(choiceIndexAfterStep(0, [], 'right', 3), 1);
+  assert.equal(choiceIndexAfterStep(0, [1], 'right', 3), 2);
+  assert.equal(choiceIndexAfterStep(2, [1], 'left', 3), 0);
+  assert.equal(choiceIndexAfterStep(0, [], 'left', 3), 0);
+  assert.equal(choiceIndexAfterStep(2, [], 'right', 3), 2);
+});
+
+test('registers only remote keys reported by a Tizen television', () => {
+  const { supportedRemoteKeys } = moduleUnderTest;
+  assert.deepEqual(
+    supportedRemoteKeys(
+      ['MediaPlayPause', 'MediaTrackNext', 'Caption'],
+      [{ name: 'MediaPlayPause' }, { name: 'Caption' }, { name: 'ColorF0Red' }]
+    ),
+    ['MediaPlayPause', 'Caption']
+  );
 });
 
 test('prefers the primary Play action for initial focus', () => {

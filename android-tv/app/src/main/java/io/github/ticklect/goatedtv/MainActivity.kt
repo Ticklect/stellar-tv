@@ -104,12 +104,6 @@ class MainActivity : Activity() {
             setGeolocationEnabled(false)
             userAgentString = "$userAgentString GoatedAndroidTV/${BuildConfig.VERSION_NAME}"
         }
-        browser.setInitialScale(
-            TvViewport.initialScalePercent(
-                resources.displayMetrics.widthPixels,
-                resources.displayMetrics.density,
-            ),
-        )
 
         CookieManager.getInstance().apply {
             setAcceptCookie(true)
@@ -175,7 +169,7 @@ class MainActivity : Activity() {
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         val remoteKey = RemoteKeyMapper.fromAndroidKeyCode(event.keyCode)
             ?: return super.dispatchKeyEvent(event)
-        if (remoteKey.key == "BrowserBack" && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (event.keyCode == KeyEvent.KEYCODE_BACK && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return super.dispatchKeyEvent(event)
         }
         TvLog.debug(
@@ -193,8 +187,20 @@ class MainActivity : Activity() {
         }
         if (!scriptsReady) return super.dispatchKeyEvent(event)
 
-        dispatchRemoteKey(remoteKey)
+        val fallbackEvent = KeyEvent(event)
+        dispatchRemoteKey(remoteKey) { handled ->
+            if (!handled) dispatchUnhandledKeyToWebView(fallbackEvent)
+        }
         return true
+    }
+
+    private fun dispatchUnhandledKeyToWebView(event: KeyEvent) {
+        val browser = webView ?: return
+        TvLog.debug("Web key was not handled; forwarding ${event.keyCode} to WebView")
+        browser.dispatchKeyEvent(event)
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            browser.dispatchKeyEvent(KeyEvent.changeAction(event, KeyEvent.ACTION_UP))
+        }
     }
 
     private fun handleBackKey(remoteKey: WebRemoteKey) {

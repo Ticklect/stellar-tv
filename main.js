@@ -250,6 +250,14 @@
     '[role="button"]',
     '[role="link"]',
     '[role="slider"]',
+    '[role="switch"]',
+    '[role="tab"]',
+    '[role="menuitem"]',
+    '[role="option"]',
+    '[role="checkbox"]',
+    '[role="radio"]',
+    '[role="combobox"]',
+    '[contenteditable="true"]',
     '[tabindex]:not([tabindex="-1"])'
   ].join(',');
 
@@ -263,7 +271,8 @@
     candidateCache: typeof WeakMap === 'function' ? new WeakMap() : null,
     focusSurface: null,
     userInteracted: false,
-    started: false
+    started: false,
+    path: window.location.pathname
   };
 
   function rectOf(element) {
@@ -289,6 +298,15 @@
     return isNaN(value) ? 0 : value;
   }
 
+  function isSideDrawerRect(rect, viewportWidth, viewportHeight) {
+    return (
+      rect.width >= viewportWidth * 0.3 &&
+      rect.width <= viewportWidth * 0.65 &&
+      rect.height >= viewportHeight * 0.8 &&
+      (rect.left <= viewportWidth * 0.05 || rect.right >= viewportWidth * 0.95)
+    );
+  }
+
   function activeScope() {
     var dialogs = Array.prototype.slice
       .call(document.querySelectorAll('[role="dialog"][aria-modal="true"]'))
@@ -300,6 +318,26 @@
       return dialogs[dialogs.length - 1];
     }
 
+    var sideDrawers = Array.prototype.slice
+      .call(document.body.querySelectorAll('[class*="absolute"], [style*="position: absolute"]'))
+      .filter(function (element) {
+        if (!isVisible(element) || window.getComputedStyle(element).position !== 'absolute')
+          return false;
+        var rect = rectOf(element);
+        return (
+          isSideDrawerRect(rect, window.innerWidth, window.innerHeight) &&
+          !!element.querySelector(SELECTOR)
+        );
+      });
+    if (sideDrawers.length) {
+      sideDrawers.sort(function (a, b) {
+        var aRect = rectOf(a);
+        var bRect = rectOf(b);
+        return bRect.width * bRect.height - aRect.width * aRect.height;
+      });
+      return sideDrawers[sideDrawers.length - 1];
+    }
+
     var overlaySelector = '[class*="fixed"], [style*="position: fixed"], [style*="position:fixed"]';
     var fixedOverlays = Array.prototype.slice
       .call(document.body.querySelectorAll(overlaySelector))
@@ -308,8 +346,10 @@
         var style = window.getComputedStyle(element);
         if (style.position !== 'fixed' || numericZIndex(element) < 60) return false;
         var rect = rectOf(element);
-        if (rect.width < window.innerWidth * 0.7 || rect.height < window.innerHeight * 0.7)
-          return false;
+        var isFullOverlay =
+          rect.width >= window.innerWidth * 0.7 && rect.height >= window.innerHeight * 0.7;
+        var isSideDrawer = isSideDrawerRect(rect, window.innerWidth, window.innerHeight);
+        if (!isFullOverlay && !isSideDrawer) return false;
         return !!element.querySelector(SELECTOR);
       });
     fixedOverlays.sort(function (a, b) {
@@ -438,6 +478,10 @@
     );
   }
 
+  function isChoice(element) {
+    return !!element && element.tagName === 'SELECT';
+  }
+
   function focusSurfaceFor(element) {
     if (!isAndroidTv || !element || isSlider(element)) return null;
     var elementRect = rectOf(element);
@@ -545,6 +589,25 @@
       return;
     }
     setFocus(preferredInitial(scope));
+  }
+
+  function resetFocusForRoute() {
+    if (state.path === window.location.pathname) return false;
+    state.path = window.location.pathname;
+    clearFocusDecoration();
+    state.current = null;
+    state.previousFocus = null;
+    state.previousScope = null;
+    state.preferredX = null;
+    state.domVersion += 1;
+    return true;
+  }
+
+  function focusNewRoute() {
+    if (!resetFocusForRoute()) return;
+    setTimeout(function () {
+      ensureFocus(true);
+    }, 280);
   }
 
   function railFor(element) {
@@ -754,11 +817,23 @@
     if (key === 'MediaPlay' || key === 'Play') return togglePlayback('play');
     if (key === 'MediaPause' || key === 'Pause') return togglePlayback('pause');
     if (key === 'MediaPlayPause' || key === 'PlayPause') return togglePlayback();
-    if (key === 'MediaFastForward' || key === 'FastForward') return seek(15);
-    if (key === 'MediaRewind' || key === 'Rewind') return seek(-15);
+    if (
+      key === 'MediaFastForward' ||
+      key === 'FastForward' ||
+      key === 'MediaSkipForward' ||
+      key === 'MediaStepForward'
+    )
+      return seek(15);
+    if (
+      key === 'MediaRewind' ||
+      key === 'Rewind' ||
+      key === 'MediaSkipBackward' ||
+      key === 'MediaStepBackward'
+    )
+      return seek(-15);
     if (key === 'MediaTrackNext') return seek(15);
     if (key === 'MediaTrackPrevious') return seek(-15);
-    if (key === 'MediaStop' || key === 'Stop') {
+    if (key === 'MediaStop' || key === 'Stop' || key === 'MediaClose') {
       var video = videoElement();
       if (!video) return false;
       video.pause();
@@ -820,9 +895,45 @@
     return true;
   }
 
+  function choiceIndexAfterStep(currentIndex, disabledOptions, direction, optionCount) {
+    var index = Number(currentIndex);
+    var step = direction === 'left' ? -1 : 1;
+    var candidate = index + step;
+    while (candidate >= 0 && candidate < optionCount) {
+      if (disabledOptions.indexOf(candidate) === -1) return candidate;
+      candidate += step;
+    }
+    return index;
+  }
+
+  function adjustChoice(element, direction) {
+    if (!isChoice(element)) return false;
+    var disabled = Array.prototype.slice
+      .call(element.options || [])
+      .map(function (option, index) {
+        return option.disabled ? index : -1;
+      })
+      .filter(function (index) {
+        return index >= 0;
+      });
+    var nextIndex = choiceIndexAfterStep(
+      element.selectedIndex,
+      disabled,
+      direction,
+      element.options.length
+    );
+    if (nextIndex === element.selectedIndex) return true;
+    element.selectedIndex = nextIndex;
+    element.dispatchEvent(new window.Event('input', { bubbles: true }));
+    element.dispatchEvent(new window.Event('change', { bubbles: true }));
+    return true;
+  }
+
   function normalizedKey(event) {
     var codeMap = {
       13: 'Enter',
+      18: 'ContextMenu',
+      32: ' ',
       37: 'ArrowLeft',
       38: 'ArrowUp',
       39: 'ArrowRight',
@@ -832,16 +943,78 @@
       413: 'MediaStop',
       415: 'MediaPlay',
       417: 'MediaFastForward',
+      457: 'Info',
       19: 'MediaPause',
       10232: 'MediaTrackPrevious',
       10233: 'MediaTrackNext',
+      10221: 'Captions',
       10252: 'MediaPlayPause'
     };
     return codeMap[event.keyCode] || codeMap[event.which] || event.key || event.code || '';
   }
 
   function isTextInput(element) {
-    return !!element && /^(INPUT|TEXTAREA|SELECT)$/.test(element.tagName);
+    return (
+      !!element && (/^(INPUT|TEXTAREA|SELECT)$/.test(element.tagName) || element.isContentEditable)
+    );
+  }
+
+  function controlLabel(element) {
+    return (
+      element.getAttribute('aria-label') ||
+      element.getAttribute('title') ||
+      element.innerText ||
+      element.textContent ||
+      ''
+    ).trim();
+  }
+
+  function activateNamedControl(pattern) {
+    var scope = activeScope();
+    var items = Array.prototype.slice.call(scope.querySelectorAll(SELECTOR));
+    if (scope.matches && scope.matches(SELECTOR)) items.unshift(scope);
+    var item = items.filter(isVisible).filter(function (element) {
+      return pattern.test(controlLabel(element));
+    })[0];
+    if (!item) return false;
+    setFocus(item);
+    if (item.matches('button, a, [role="button"], [role="link"]')) item.click();
+    return true;
+  }
+
+  function activateGlobalControlWhenAvailable(pattern, attempts) {
+    var items = Array.prototype.slice.call(document.body.querySelectorAll(SELECTOR));
+    var item = items.filter(isVisible).filter(function (element) {
+      return pattern.test(controlLabel(element));
+    })[0];
+    if (item) {
+      setFocus(item);
+      if (item.matches('button, a, [role="button"], [role="link"]')) item.click();
+      return;
+    }
+    if (attempts <= 0) return;
+    setTimeout(function () {
+      activateGlobalControlWhenAvailable(pattern, attempts - 1);
+    }, 180);
+  }
+
+  function handleShortcut(key) {
+    if (key === 'ContextMenu' || key === 'Menu') {
+      return activateNamedControl(/^(Settings|Menu)$/i);
+    }
+    if (key === 'Info') {
+      return activateNamedControl(/^(Info|More info(?:rmation)?|Details|View details)$/i);
+    }
+    if (key === 'Captions') {
+      if (activateNamedControl(/^(Captions|Closed captions|Subtitles)(?:\b|$)/i)) return true;
+      if (isPlayerPage() && activateNamedControl(/^Settings$/i)) {
+        setTimeout(function () {
+          activateGlobalControlWhenAvailable(/^(Captions|Closed captions|Subtitles)(?:\b|$)/i, 8);
+        }, 1000);
+        return true;
+      }
+    }
+    return false;
   }
 
   function activateFocused() {
@@ -849,9 +1022,8 @@
     if (!current) return false;
     if (isTextInput(current)) {
       if (
-        current.tagName === 'SELECT' ||
-        (current.tagName === 'INPUT' &&
-          /^(button|checkbox|color|radio|reset|submit)$/.test(current.type))
+        current.tagName === 'INPUT' &&
+        /^(button|checkbox|color|radio|reset|submit)$/.test(current.type)
       ) {
         current.click();
         return true;
@@ -859,7 +1031,9 @@
       return false;
     }
     if (
-      current.matches('a, button, [role="button"], [role="link"]') ||
+      current.matches(
+        'a, button, [role="button"], [role="link"], [role="switch"], [role="tab"], [role="menuitem"], [role="option"], [role="checkbox"], [role="radio"], [role="combobox"]'
+      ) ||
       typeof current.onclick === 'function'
     ) {
       current.click();
@@ -961,7 +1135,19 @@
       return;
     }
 
-    if (key === 'Back' || key === 'BrowserBack' || key === 'XF86Back' || event.keyCode === 10009) {
+    if (handleShortcut(key)) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    if (
+      key === 'Back' ||
+      key === 'BrowserBack' ||
+      key === 'XF86Back' ||
+      key === 'Escape' ||
+      event.keyCode === 10009
+    ) {
       if (closeCurrentLayer()) {
         event.preventDefault();
         event.stopPropagation();
@@ -977,6 +1163,12 @@
         event.stopPropagation();
         return;
       }
+      if (isAndroidTv && isChoice(active) && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+        adjustChoice(active, key === 'ArrowLeft' ? 'left' : 'right');
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       if (isTextInput(active) && (key === 'ArrowLeft' || key === 'ArrowRight')) return;
       if (isPlayerPage()) playerArrow(key);
       else spatialMove(key.slice(5).toLowerCase());
@@ -985,7 +1177,9 @@
       return;
     }
 
-    if (key === 'Enter' || key === 'NumpadEnter') {
+    if ((key === ' ' || key === 'Spacebar') && isTextInput(focusedElement())) return;
+
+    if (key === 'Enter' || key === 'NumpadEnter' || key === ' ' || key === 'Spacebar') {
       var activated = activateFocused();
       if (!activated && isPlayerPage()) activated = togglePlayback();
       if (activated) {
@@ -1007,6 +1201,7 @@
   }
 
   function scheduleRefresh(records) {
+    var routeChanged = resetFocusForRoute();
     if (
       records &&
       records.some(function (record) {
@@ -1029,7 +1224,7 @@
     if (state.mutationTimer) return;
     state.mutationTimer = setTimeout(function () {
       state.mutationTimer = null;
-      ensureFocus(!state.userInteracted);
+      ensureFocus(routeChanged || !state.userInteracted);
     }, 180);
   }
 
@@ -1053,13 +1248,21 @@
     document.documentElement.classList.add('goated-tv-mode');
     if (isAndroidTv) document.documentElement.classList.add('goated-android-tv');
     addStyle();
+    registerTizenRemoteKeys();
     tuneImages(document.documentElement);
     document.addEventListener('keydown', handleKeyDown, true);
     document.addEventListener('focusin', handleFocusIn, true);
+    ['pushState', 'replaceState'].forEach(function (method) {
+      var original = window.history[method];
+      if (typeof original !== 'function') return;
+      window.history[method] = function () {
+        var result = original.apply(window.history, arguments);
+        focusNewRoute();
+        return result;
+      };
+    });
     window.addEventListener('popstate', function () {
-      setTimeout(function () {
-        ensureFocus(true);
-      }, 250);
+      focusNewRoute();
     });
     new MutationObserver(function (records) {
       records.forEach(function (record) {
@@ -1084,6 +1287,53 @@
     setInterval(function () {
       ensureFocus(false);
     }, 2000);
+  }
+
+  function supportedRemoteKeys(desiredKeys, supportedKeys) {
+    var supportedNames = supportedKeys.map(function (key) {
+      return key.name;
+    });
+    return desiredKeys.filter(function (key) {
+      return supportedNames.indexOf(key) !== -1;
+    });
+  }
+
+  function registerTizenRemoteKeys() {
+    try {
+      if (!window.tizen || !tizen.tvinputdevice) return;
+      var desiredKeys = [
+        'MediaPlayPause',
+        'MediaPlay',
+        'MediaPause',
+        'MediaStop',
+        'MediaFastForward',
+        'MediaRewind',
+        'MediaTrackPrevious',
+        'MediaTrackNext',
+        'Menu',
+        'Info',
+        'Caption'
+      ];
+      var supported = tizen.tvinputdevice.getSupportedKeys();
+      var keys = supportedRemoteKeys(desiredKeys, supported);
+      if (!keys.length) return;
+      function registerIndividually() {
+        keys.forEach(function (key) {
+          try {
+            tizen.tvinputdevice.registerKey(key);
+          } catch (error) {
+            reportError('remote-key-registration-' + key, error);
+          }
+        });
+      }
+      if (typeof tizen.tvinputdevice.registerKeyBatch === 'function') {
+        tizen.tvinputdevice.registerKeyBatch(keys, function () {}, registerIndividually);
+      } else {
+        registerIndividually();
+      }
+    } catch (error) {
+      reportError('remote-key-registration', error);
+    }
   }
 
   if (document.readyState === 'loading')
