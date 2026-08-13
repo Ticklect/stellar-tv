@@ -25,6 +25,20 @@
     }
   }
 
+  function monotonicNow() {
+    return window.performance && typeof window.performance.now === 'function'
+      ? window.performance.now()
+      : Date.now();
+  }
+
+  function markActivationRoute() {
+    var activation = diagnostics.lastActivation;
+    if (!activation || activation.routeAt !== null) return;
+    activation.routeAt = monotonicNow();
+    activation.routeDelayMs = activation.routeAt - activation.clickAt;
+    activation.pathAfter = window.location.pathname;
+  }
+
   var POW_K = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -240,6 +254,10 @@
   var STYLE_ID = 'goated-tv-navigation-style';
   var FOCUS_CLASS = 'goated-tv-focused';
   var FOCUS_SURFACE_CLASS = 'goated-tv-focus-surface';
+  var VIDEO_CARD_CLASS = 'goated-tv-video-card';
+  var VIDEO_RAIL_CLASS = 'goated-tv-video-rail';
+  var FOCUS_OUTSET = 9;
+  var FOCUS_GUTTER = 16;
   var isAndroidTv = /GoatedAndroidTV/i.test(navigator.userAgent || '');
   var SELECTOR = [
     'a[href]',
@@ -282,6 +300,76 @@
   function centerOf(element) {
     var rect = rectOf(element);
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }
+
+  function scrollDeltaForVisibility(itemStart, itemEnd, visibleStart, visibleEnd) {
+    if (itemStart < visibleStart) return itemStart - visibleStart;
+    if (itemEnd > visibleEnd) return itemEnd - visibleEnd;
+    return 0;
+  }
+
+  function scrollRootTo(top) {
+    window.scrollTo(0, Math.max(0, top));
+  }
+
+  function rootScrollElement() {
+    return document.scrollingElement || document.documentElement || document.body;
+  }
+
+  function isScrollableOverflow(value) {
+    return /^(auto|scroll|overlay)$/.test(value || '');
+  }
+
+  function verticalScrollOwner(element) {
+    var parent = element && element.parentElement;
+    while (parent && parent !== document.body && parent !== document.documentElement) {
+      var style = window.getComputedStyle(parent);
+      if (isScrollableOverflow(style.overflowY) && parent.scrollHeight > parent.clientHeight + 1) {
+        return parent;
+      }
+      parent = parent.parentElement;
+    }
+    return null;
+  }
+
+  function fixedHeaderBottom() {
+    var headers = Array.prototype.slice.call(document.querySelectorAll('header'));
+    return headers.reduce(function (bottom, header) {
+      if (!isVisible(header)) return bottom;
+      var position = window.getComputedStyle(header).position;
+      if (position !== 'fixed' && position !== 'sticky') return bottom;
+      var rect = rectOf(header);
+      if (rect.top > window.innerHeight * 0.25 || rect.bottom <= 0) return bottom;
+      return Math.max(bottom, rect.bottom);
+    }, 0);
+  }
+
+  function isHomeHeroPrimary(element) {
+    if (!isAndroidTv || window.location.pathname !== '/' || activeScope() !== document.body)
+      return false;
+    if (!/^(Play|Resume\b|Watch\b|Maybe later$)/i.test(controlLabel(element))) return false;
+    var hero = element.closest && element.closest('section');
+    if (!hero) return false;
+    var root = rootScrollElement();
+    return Math.abs(rectOf(hero).top + (root ? root.scrollTop : window.scrollY || 0)) <= 24;
+  }
+
+  function isVideoCard(element) {
+    if (!element || !element.querySelector || !element.querySelector('img, video')) return false;
+    var identity = controlLabel(element) + ' ' + String(element.className || '');
+    if (!/(trailer|teaser|\bclip\b|group\/video)/i.test(identity)) return false;
+    var rect = rectOf(element);
+    if (!rect.height) return false;
+    var ratio = rect.width / rect.height;
+    return ratio >= 1.35 && ratio <= 2.15;
+  }
+
+  function decorateVideoRail(element) {
+    if (!isAndroidTv || !isVideoCard(element)) return;
+    var rail = railFor(element);
+    if (!rail) return;
+    element.classList.add(VIDEO_CARD_CLASS);
+    rail.classList.add(VIDEO_RAIL_CLASS);
   }
 
   function isVisible(element) {
@@ -389,6 +477,7 @@
     }
     var found = Array.prototype.slice.call(scope.querySelectorAll(SELECTOR));
     if (scope.matches && scope.matches(SELECTOR)) found.unshift(scope);
+    found.forEach(decorateVideoRail);
     var items = found.filter(function (element, index, all) {
       return (
         isVisible(element) &&
@@ -446,6 +535,15 @@
       'html.goated-tv-mode .row-scroll, html.goated-tv-mode [class*="overflow-x-auto"] {',
       '  content-visibility: auto;',
       '  contain-intrinsic-size: auto 280px;',
+      '}',
+      'html.goated-android-tv .' + VIDEO_RAIL_CLASS + ' {',
+      '  box-sizing: border-box;',
+      '  padding-block: ' + (FOCUS_OUTSET + 3) + 'px !important;',
+      '  padding-inline: ' + (FOCUS_OUTSET + 3) + 'px !important;',
+      '  scroll-padding-inline: ' + FOCUS_GUTTER + 'px;',
+      '}',
+      'html.goated-android-tv .' + VIDEO_CARD_CLASS + ' {',
+      '  scroll-margin: ' + FOCUS_GUTTER + 'px;',
       '}',
       '@media (min-width: 960px) and (orientation: landscape) {',
       '  html.goated-android-tv section[class~="h-[90vh]"] {',
@@ -519,16 +617,47 @@
   function scrollToElement(element) {
     var rail = railFor(element);
     if (rail) {
+      decorateVideoRail(element);
       var item = rectOf(element);
       var container = rectOf(rail);
-      if (item.left < container.left + 24) rail.scrollLeft -= container.left + 80 - item.left;
-      else if (item.right > container.right - 24)
-        rail.scrollLeft += item.right - container.right + 80;
+      var horizontalDelta = scrollDeltaForVisibility(
+        item.left,
+        item.right,
+        container.left + FOCUS_GUTTER,
+        container.right - FOCUS_GUTTER
+      );
+      if (horizontalDelta) rail.scrollLeft += horizontalDelta;
     }
-    try {
-      element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
-    } catch (error) {
-      element.scrollIntoView(false);
+
+    if (isHomeHeroPrimary(element)) {
+      scrollRootTo(0);
+      return;
+    }
+
+    var itemRect = rectOf(element);
+    var owner = verticalScrollOwner(element);
+    if (owner) {
+      var ownerRect = rectOf(owner);
+      var ownerDelta = scrollDeltaForVisibility(
+        itemRect.top,
+        itemRect.bottom,
+        ownerRect.top + FOCUS_GUTTER,
+        ownerRect.bottom - FOCUS_GUTTER
+      );
+      if (ownerDelta) owner.scrollTop += ownerDelta;
+      return;
+    }
+
+    var root = rootScrollElement();
+    var topInset = Math.max(FOCUS_GUTTER, fixedHeaderBottom() + FOCUS_OUTSET);
+    var rootDelta = scrollDeltaForVisibility(
+      itemRect.top,
+      itemRect.bottom,
+      topInset,
+      window.innerHeight - FOCUS_GUTTER
+    );
+    if (rootDelta || (root && root.scrollLeft)) {
+      scrollRootTo((root ? root.scrollTop : window.scrollY || 0) + rootDelta);
     }
   }
 
@@ -1037,7 +1166,30 @@
     return false;
   }
 
-  function activateFocused() {
+  function clickWithDiagnostics(element, event) {
+    var clickAt = monotonicNow();
+    diagnostics.lastActivation = {
+      key: normalizedKey(event || {}),
+      label: controlLabel(element),
+      pathBefore: window.location.pathname,
+      bridgeAt:
+        event && typeof event.__goatedTvBridgeAt === 'number' ? event.__goatedTvBridgeAt : null,
+      handlerAt:
+        diagnostics.lastKeyDown && diagnostics.lastKeyDown.key === normalizedKey(event || {})
+          ? diagnostics.lastKeyDown.at
+          : null,
+      clickAt: clickAt,
+      clickReturnedAt: null,
+      routeAt: null,
+      routeDelayMs: null,
+      pathAfter: null
+    };
+    element.click();
+    diagnostics.lastActivation.clickReturnedAt = monotonicNow();
+    return true;
+  }
+
+  function activateFocused(event) {
     var current = focusedElement();
     if (!current) return false;
     if (isTextInput(current)) {
@@ -1045,8 +1197,7 @@
         current.tagName === 'INPUT' &&
         /^(button|checkbox|color|radio|reset|submit)$/.test(current.type)
       ) {
-        current.click();
-        return true;
+        return clickWithDiagnostics(current, event);
       }
       return false;
     }
@@ -1056,10 +1207,10 @@
       ) ||
       typeof current.onclick === 'function'
     ) {
-      current.click();
+      clickWithDiagnostics(current, event);
       setTimeout(function () {
         ensureFocus(false);
-      }, 240);
+      }, 80);
       return true;
     }
     return false;
@@ -1139,6 +1290,11 @@
     if (event.__goatedTvSliderForwarded) return;
     var key = normalizedKey(event);
     if (!key) return;
+    diagnostics.lastKeyDown = {
+      key: key,
+      at: monotonicNow(),
+      bridgeAt: typeof event.__goatedTvBridgeAt === 'number' ? event.__goatedTvBridgeAt : null
+    };
     state.userInteracted = true;
 
     if (handleMedia(key)) {
@@ -1192,7 +1348,7 @@
     if ((key === ' ' || key === 'Spacebar') && isTextInput(focusedElement())) return;
 
     if (key === 'Enter' || key === 'NumpadEnter' || key === ' ' || key === 'Spacebar') {
-      var activated = activateFocused();
+      var activated = activateFocused(event);
       if (!activated && isPlayerPage()) activated = togglePlayback();
       if (activated) {
         event.preventDefault();
@@ -1270,11 +1426,13 @@
       if (typeof original !== 'function') return;
       window.history[method] = function () {
         var result = original.apply(window.history, arguments);
+        markActivationRoute();
         focusNewRoute();
         return result;
       };
     });
     window.addEventListener('popstate', function () {
+      markActivationRoute();
       focusNewRoute();
     });
     new MutationObserver(function (records) {

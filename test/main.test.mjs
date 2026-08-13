@@ -15,11 +15,13 @@ function loadModuleInternals() {
       controlLabel: controlLabel,
       directionalScore: directionalScore,
       isSideDrawerRect: isSideDrawerRect,
+      isVideoCard: isVideoCard,
       normalizedKey: normalizedKey,
       powHashHasPrefix: powHashHasPrefix,
       preferredInitial: preferredInitial,
       playerNavigationTarget: playerNavigationTarget,
       searchNavigationTarget: searchNavigationTarget,
+      scrollDeltaForVisibility: scrollDeltaForVisibility,
       sliderValueAfterStep: sliderValueAfterStep,
       supportedRemoteKeys: supportedRemoteKeys,
       state: state
@@ -83,6 +85,44 @@ test('runtime diagnostics version matches package metadata', () => {
     moduleUnderTest.context.window.__goatedTizenBrewDiagnostics.version,
     packageJson.version
   );
+});
+
+test('Android TV uses the standard WebView viewport without native global scaling', () => {
+  const activity = fs.readFileSync(
+    new URL(
+      '../android-tv/app/src/main/java/io/github/ticklect/goatedtv/MainActivity.kt',
+      import.meta.url
+    ),
+    'utf8'
+  );
+  assert.doesNotMatch(activity, /setInitialScale|TvViewport/);
+});
+
+test('focus scrolling is scoped and never delegates to generic scrollIntoView', () => {
+  const source = fs.readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /\.scrollIntoView\s*\(/);
+});
+
+test('calculates the minimum scroll needed to preserve focus gutters', () => {
+  const { scrollDeltaForVisibility } = moduleUnderTest;
+  assert.equal(scrollDeltaForVisibility(100, 200, 50, 250), 0);
+  assert.equal(scrollDeltaForVisibility(30, 130, 50, 250), -20);
+  assert.equal(scrollDeltaForVisibility(180, 280, 50, 250), 30);
+});
+
+test('adds trailer gutters only to identified landscape video cards', () => {
+  const { isVideoCard } = moduleUnderTest;
+  const card = (label, className, width, height) => ({
+    className,
+    getAttribute: () => '',
+    innerText: label,
+    textContent: label,
+    querySelector: () => ({}),
+    getBoundingClientRect: () => ({ width, height })
+  });
+  assert.equal(isVideoCard(card('Official Trailer', 'group/video', 200, 112.5)), true);
+  assert.equal(isVideoCard(card('Netflix', 'service-card', 200, 112.5)), false);
+  assert.equal(isVideoCard(card('Official Trailer', 'group/video', 180, 270)), false);
 });
 
 test('normalizes Samsung key codes and standard browser keys', () => {
