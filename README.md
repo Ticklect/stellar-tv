@@ -126,12 +126,17 @@ For ADB setup, troubleshooting, and the collapsed developer/debug build instruct
 | Fast-forward / Rewind     | Seek forward or backward 15 seconds                                                                                      |
 | Next / Previous track     | Seek forward or backward 15 seconds                                                                                      |
 | Stop                      | Pause and return the video to the beginning                                                                              |
+| Menu / controller Start   | Open the website's Settings/Menu control when available                                                                  |
+| Info                      | Open the focused page's Info/Details control when available                                                              |
+| Captions                  | Open the player's Captions/Subtitles control when available                                                              |
+| Space / controller Select | Alternative activation keys for keyboard-style and gamepad remotes                                                       |
+| Escape / controller B     | Alternative Back keys for keyboard-style and gamepad remotes                                                             |
 
 ### Android remote compatibility
 
 The Android APK handles standard Android TV key codes rather than identifying a remote brand. It is therefore expected to work with remotes for Google TV Streamer, Chromecast with Google TV, NVIDIA Shield TV, Xiaomi TV boxes/sticks, onn. Google TV devices, and Sony, TCL, Hisense, or Philips Android/Google TVs when those remotes report the standard D-pad, Select, Back, or media keys. Generic Bluetooth/USB remotes, game controllers, and HDMI-CEC TV remotes are also expected to work when Android maps their controls to those standard keys.
 
-These physical remote models are expected-compatible, not yet project-confirmed. Only the Android TV API 36 emulator has been directly validated. Voice assistant, volume, power, channel, guide, number, and colored buttons are not mapped by this app; Android or the television may handle them independently.
+These physical remote models are expected-compatible, not yet project-confirmed. Only the Android TV API 36 emulator has been directly validated. Voice assistant, volume, power, TV input, channel, guide, number, and colored buttons are intentionally not captured by this app; Android or the television handles them independently.
 
 ## Development
 
