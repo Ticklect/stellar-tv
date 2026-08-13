@@ -29,15 +29,15 @@ On Windows, use `gradlew.bat`. The debug APK is written to `app/build/outputs/ap
 This is the easiest installation method and does not require a computer:
 
 1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
-2. Enter code **`8969454`**.
+2. Enter code **`1531040`**.
 3. Download the Goated Android TV APK.
 4. If Android asks for permission, allow Downloader to install unknown apps.
 5. Return to Downloader and install the APK.
 6. Launch **Goated TV (Unofficial)** from the TV's Apps screen.
 
-You can also open the clickable Downloader link: [https://aftv.news/8969454](https://aftv.news/8969454).
+You can also open the clickable Downloader link: [https://aftv.news/1531040](https://aftv.news/1531040).
 
-> **Version note:** Code `8969454` still points to **v0.5.1**. Use the direct GitHub download below for v0.5.2 until a replacement Downloader code is published.
+> **Version note:** Code `1531040` points directly to the signed **v0.5.2** APK.
 
 ### Alternative: direct GitHub download
 
