@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-08-13
+
 ### Added
 
 - Broader Android TV remote mappings for controller Select/B/Start, keyboard Space/Escape, headset play/pause, alternate media seek/close keys, Menu, Info, and Captions.
@@ -120,7 +122,8 @@ This version corresponds to commit `b04665e`; it was not tagged in the repositor
 
 This version corresponds to commit `981fcdb`; it was not tagged in the repository.
 
-[Unreleased]: https://github.com/Ticklect/goated-tizenbrew/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/Ticklect/goated-tizenbrew/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.2
 [0.5.1]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.1
 [0.5.0]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.0
 [0.4.1]: https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.4.1
