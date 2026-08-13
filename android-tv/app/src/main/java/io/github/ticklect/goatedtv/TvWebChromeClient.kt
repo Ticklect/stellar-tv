@@ -43,6 +43,7 @@ internal class TvWebChromeClient(
         )
         fullscreenContainer.visibility = View.VISIBLE
         fullscreenContainer.bringToFront()
+        progressBar.visibility = View.GONE
         onFullscreenChanged(true)
     }
 

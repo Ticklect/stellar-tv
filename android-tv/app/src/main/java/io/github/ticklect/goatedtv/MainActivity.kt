@@ -104,6 +104,12 @@ class MainActivity : Activity() {
             setGeolocationEnabled(false)
             userAgentString = "$userAgentString GoatedAndroidTV/${BuildConfig.VERSION_NAME}"
         }
+        browser.setInitialScale(
+            TvViewport.initialScalePercent(
+                resources.displayMetrics.widthPixels,
+                resources.displayMetrics.density,
+            ),
+        )
 
         CookieManager.getInstance().apply {
             setAcceptCookie(true)
@@ -127,7 +133,10 @@ class MainActivity : Activity() {
                 injectedPageUrl = null
                 hideError()
             },
-            onTrustedPageReady = ::injectCompatibilityScripts,
+            onTrustedPageReady = { readyBrowser ->
+                progressBar.visibility = View.GONE
+                injectCompatibilityScripts(readyBrowser)
+            },
             onMainFrameError = ::showError,
             onRenderProcessGone = {
                 savedWebState = null

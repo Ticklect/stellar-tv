@@ -18,6 +18,7 @@ function loadModuleInternals() {
       normalizedKey: normalizedKey,
       powHashHasPrefix: powHashHasPrefix,
       preferredInitial: preferredInitial,
+      playerNavigationTarget: playerNavigationTarget,
       searchNavigationTarget: searchNavigationTarget,
       sliderValueAfterStep: sliderValueAfterStep,
       supportedRemoteKeys: supportedRemoteKeys,
@@ -42,7 +43,8 @@ function loadModuleInternals() {
   const window = {
     addEventListener() {},
     console: { warn() {} },
-    location: { pathname: '/' }
+    location: { pathname: '/' },
+    scrollTo() {}
   };
   window.top = window;
   window.self = window;
@@ -223,6 +225,32 @@ test('maps search focus down to Play and back up to the input', () => {
   assert.equal(searchNavigationTarget('down', input, items), play);
   assert.equal(searchNavigationTarget('up', play, items), input);
   assert.equal(searchNavigationTarget('left', play, items), null);
+});
+
+test('maps player Back down directly to the primary playback control', () => {
+  const { playerNavigationTarget, context } = moduleUnderTest;
+  const element = (label) => ({
+    getAttribute: (name) => (name === 'aria-label' ? label : ''),
+    innerText: '',
+    textContent: ''
+  });
+  const back = element('Back');
+  const settings = element('Settings');
+  const play = element('Play');
+  context.document.body = element('');
+
+  assert.equal(playerNavigationTarget('ArrowDown', back, [back, settings, play]), play);
+});
+
+test('does not override Up navigation inside player settings', () => {
+  const { playerNavigationTarget } = moduleUnderTest;
+  const playbackSettings = {
+    getAttribute: (name) => (name === 'aria-label' ? 'Playback Settings' : ''),
+    innerText: '',
+    textContent: ''
+  };
+
+  assert.equal(playerNavigationTarget('ArrowUp', playbackSettings, []), null);
 });
 
 test('caches focus candidates until the DOM version changes', () => {

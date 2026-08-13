@@ -423,12 +423,18 @@
       '  transform: none !important;',
       '}',
       'html.goated-android-tv input[type="range"] {',
-      '  min-width: min(42vw, 360px);',
+      '  width: 100%;',
+      '  min-width: 0;',
+      '  max-width: 100%;',
       '  min-height: 28px;',
       '}',
       'html.goated-android-tv input[type="range"].' + FOCUS_CLASS + ' {',
-      '  outline-offset: 5px !important;',
-      '  box-shadow: 0 0 0 3px rgba(0,0,0,.9), 0 0 18px rgba(255,255,255,.55) !important;',
+      '  outline: none !important;',
+      '  box-shadow: none !important;',
+      '  filter: brightness(1.35) drop-shadow(0 0 7px rgba(255,255,255,.8));',
+      '}',
+      'html.goated-android-tv input[type="range"].' + FOCUS_CLASS + '::-webkit-slider-thumb {',
+      '  box-shadow: 0 0 0 4px #fff, 0 0 0 7px rgba(0,0,0,.8) !important;',
       '}',
       '.' + FOCUS_CLASS + ' img { filter: brightness(1.08); }',
       'html.goated-tv-mode, html.goated-tv-mode * { scroll-behavior: auto !important; }',
@@ -605,6 +611,7 @@
 
   function focusNewRoute() {
     if (!resetFocusForRoute()) return;
+    if (isAndroidTv) window.scrollTo(0, 0);
     setTimeout(function () {
       ensureFocus(true);
     }, 280);
@@ -738,6 +745,19 @@
       return items.filter(isTextInput)[0] || null;
     }
     return null;
+  }
+
+  function playerNavigationTarget(key, current, items) {
+    var currentLabel = current ? controlLabel(current) : '';
+    var startsAtBack =
+      !current || current === document.body || /^(Back|Go back)$/i.test(currentLabel);
+    if (key !== 'ArrowDown' || !startsAtBack) return null;
+
+    return (
+      items.filter(function (element) {
+        return /^(Play|Pause)$/i.test(controlLabel(element));
+      })[0] || null
+    );
   }
 
   // A pure scoring function keeps the navigation geometry deterministic and testable.
@@ -1105,21 +1125,13 @@
   function playerArrow(key) {
     wakePlayer();
     var current = focusedElement();
-    var label = current ? current.getAttribute('aria-label') || '' : '';
     var onPlayerControl = current && current.closest && current.closest('button');
 
     if ((key === 'ArrowLeft' || key === 'ArrowRight') && !onPlayerControl) {
       return seek(key === 'ArrowLeft' ? -15 : 15);
     }
-    if (key === 'ArrowDown' && (!current || current === document.body || label === 'Back')) {
-      wakePlayer();
-      var play = document.querySelector('button[aria-label="Play"], button[aria-label="Pause"]');
-      return play ? setFocus(play) : false;
-    }
-    if (key === 'ArrowUp' && onPlayerControl && label !== 'Back') {
-      var back = document.querySelector('button[aria-label="Back"]');
-      return back ? setFocus(back) : false;
-    }
+    var target = playerNavigationTarget(key, current, candidates(document.body));
+    if (target) return setFocus(target);
     return spatialMove(key.slice(5).toLowerCase());
   }
 
@@ -1247,6 +1259,7 @@
     state.started = true;
     document.documentElement.classList.add('goated-tv-mode');
     if (isAndroidTv) document.documentElement.classList.add('goated-android-tv');
+    if (isAndroidTv) window.scrollTo(0, 0);
     addStyle();
     registerTizenRemoteKeys();
     tuneImages(document.documentElement);
