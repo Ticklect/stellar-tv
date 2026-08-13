@@ -66,7 +66,7 @@ Follow the upstream [TizenBrew installation guide](https://github.com/reisxd/Tiz
 
 1. Open TizenBrew on the TV.
 2. Open the module manager and choose the GitHub source.
-3. Enter `Ticklect/goated-tizenbrew@0.5.1` for the latest published release.
+3. Enter `Ticklect/goated-tizenbrew@0.5.2` for the latest published release.
 4. Confirm that **Goated** appears with the expected version, then launch it.
 
 Pinning a version is recommended because it makes updates deliberate and avoids stale module-script identities in TizenBrew 2.0.5.
@@ -99,18 +99,18 @@ This is the easiest installation method and does not require a computer:
 
 You can also open the clickable Downloader link: [https://aftv.news/8969454](https://aftv.news/8969454).
 
-> **Version note:** Code `8969454` points directly to the signed **v0.5.1** APK. A new code will be required when a newer APK release is published.
+> **Version note:** Code `8969454` still points to **v0.5.1**. Use the direct GitHub download below for v0.5.2 until a replacement Downloader code is published.
 
 #### Alternative: direct GitHub download
 
-Advanced users can download the signed [`goated-android-tv-v0.5.1.apk`](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.1/goated-android-tv-v0.5.1.apk) directly from [GitHub Release v0.5.1](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.1).
+Download the signed [`goated-android-tv-v0.5.2.apk`](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.2/goated-android-tv-v0.5.2.apk) directly from [GitHub Release v0.5.2](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.2).
 
 #### Alternative: ADB installation
 
 Developers and advanced users can install the downloaded release APK through ADB:
 
 ```sh
-adb install -r goated-android-tv-v0.5.1.apk
+adb install -r goated-android-tv-v0.5.2.apk
 ```
 
 For ADB setup, troubleshooting, and the collapsed developer/debug build instructions, see the [complete Android TV installation guide](android-tv/README.md#install-on-an-android-tv-or-google-tv).

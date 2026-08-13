@@ -13,11 +13,11 @@ Statuses are evidence labels:
 
 ## Android TV / Google TV
 
-| Device / Android version                          | Build | Status    | Notes                                                                                                                                                                         |
-| ------------------------------------------------- | ----- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Local JVM policy tests                            | 0.5.1 | Confirmed | Remote-key mapping, viewport scaling, and trusted-navigation policy pass locally. This is not a device test.                                                                  |
-| Android TV emulator / Android 16 (API 36), x86_64 | 0.5.1 | Confirmed | D-pad navigation, subtitle sliders, modal focus restoration, and 720p/1080p/simulated-4K layouts were confirmed on 2026-08-12; v0.5.0 playback/media validation also applies. |
-| Android TV / Google TV hardware, API 23+          | 0.5.1 | Untested  | The signed APK builds and automated checks pass; playback, fullscreen, codecs, DRM, and physical-remote behavior still require physical-device validation.                    |
+| Device / Android version                          | Build | Status    | Notes                                                                                                                                       |
+| ------------------------------------------------- | ----- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local JVM policy tests                            | 0.5.2 | Confirmed | Remote-key mapping, default viewport behavior, and trusted-navigation policy pass locally. This is not a device test.                       |
+| Android TV emulator / Android 16 (API 36), x86_64 | 0.5.2 | Confirmed | D-pad navigation, settings, subtitles, media keys, fullscreen, playback, and 1080p scaling were confirmed on 2026-08-13.                    |
+| Android TV / Google TV hardware, API 23+          | 0.5.2 | Confirmed | Physical-TV testing confirmed the restored v0.5.0-scale layout and retained v0.5.1 features. Device-specific codecs and DRM can still vary. |
 
 The minimum SDK is API 23. This is a packaging floor, not a claim that every device, WebView version, codec, media provider, or DRM configuration works.
 
