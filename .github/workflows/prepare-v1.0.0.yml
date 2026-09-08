@@ -25,7 +25,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import base64
+          import hashlib
           import json
           from PIL import Image
 
@@ -52,9 +52,19 @@ jobs:
           gradle = gradle.replace('versionCode = 8', 'versionCode = 9')
           gradle_path.write_text(gradle)
 
+          # The current xhdpi launcher is byte-for-byte the 96x96 LANCZOS resize
+          # of the exact artwork supplied for v1.0.0. Use that known-good PNG
+          # rather than routing binary image data through a text file.
+          seed = root / 'android-tv/app/src/main/res/mipmap-xhdpi/ic_launcher.png'
+          seed_bytes = seed.read_bytes()
+          seed_digest = hashlib.sha256(seed_bytes).hexdigest()
+          expected_digest = '9b2ea8ddb1ea6af041f3583f1bea6c005c25fb348defa435baf551009550f217'
+          if seed_digest != expected_digest:
+              raise SystemExit(f'Unexpected Stellar launcher seed: {seed_digest}')
+
           source = root / 'android-tv/app/src/main/res/drawable-nodpi/stellar_app_icon.png'
           source.parent.mkdir(parents=True, exist_ok=True)
-          source.write_bytes(base64.b64decode((root / '.stellar-v1-icon.b64').read_text().strip()))
+          source.write_bytes(seed_bytes)
 
           image = Image.open(source).convert('RGB')
           expected = {'mdpi': 48, 'hdpi': 72, 'xhdpi': 96, 'xxhdpi': 144, 'xxxhdpi': 192}
@@ -80,11 +90,11 @@ jobs:
           for path in [root / 'README.md', root / 'android-tv/README.md']:
               if path.exists():
                   text = path.read_text()
-                  text = text.replace('0.5.3', '1.0.0').replace('v0.5.3', 'v1.0.0')
+                  text = text.replace('v0.5.3', 'v1.0.0').replace('0.5.3', '1.0.0')
                   path.write_text(text)
 
           test_path = root / 'test/android-launcher-icon.test.mjs'
-          test_path.write_text('''import assert from \'node:assert/strict\';\nimport { createHash } from \'node:crypto\';\nimport fs from \'node:fs\';\nimport test from \'node:test\';\n\nconst read = (path) => fs.readFileSync(new URL(path, import.meta.url), \'utf8\');\n\ntest(\'Android launcher uses the supplied Stellar artwork\', () => {\n  const manifest = read(\'../android-tv/app/src/main/AndroidManifest.xml\');\n  const source = fs.readFileSync(\n    new URL(\'../android-tv/app/src/main/res/drawable-nodpi/stellar_app_icon.png\', import.meta.url)\n  );\n  const digest = createHash(\'sha256\').update(source).digest(\'hex\');\n\n  assert.equal(digest, \'efac91d1a35732559d85e0c16af6409eab8af74cf121a40dc556ecc7af4319b7\');\n  assert.match(manifest, /android:icon="@mipmap\\/ic_launcher"/);\n  assert.match(manifest, /android:roundIcon="@mipmap\\/ic_launcher_round"/);\n});\n''')
+          test_path.write_text('''import assert from \'node:assert/strict\';\nimport { createHash } from \'node:crypto\';\nimport fs from \'node:fs\';\nimport test from \'node:test\';\n\nconst read = (path) => fs.readFileSync(new URL(path, import.meta.url), \'utf8\');\n\ntest(\'Android launcher uses the supplied Stellar artwork\', () => {\n  const manifest = read(\'../android-tv/app/src/main/AndroidManifest.xml\');\n  const source = fs.readFileSync(\n    new URL(\'../android-tv/app/src/main/res/drawable-nodpi/stellar_app_icon.png\', import.meta.url)\n  );\n  const digest = createHash(\'sha256\').update(source).digest(\'hex\');\n\n  assert.equal(digest, \'9b2ea8ddb1ea6af041f3583f1bea6c005c25fb348defa435baf551009550f217\');\n  assert.match(manifest, /android:icon="@mipmap\\/ic_launcher"/);\n  assert.match(manifest, /android:roundIcon="@mipmap\\/ic_launcher_round"/);\n});\n''')
 
           for stale in [
               '.github/workflows/prepare-v0.5.3-branch.yml',
@@ -103,7 +113,7 @@ jobs:
       - name: Format and verify source
         run: |
           npm ci
-          npx prettier --write package.json package-lock.json CHANGELOG.md README.md android-tv/README.md test/android-launcher-icon.test.mjs
+          npx prettier --write package.json package-lock.json CHANGELOG.md README.md android-tv/README.md test/android-launcher-icon.test.mjs test/release-metadata.test.mjs
           npm run validate
 
       - name: Commit prepared v1.0.0 release
