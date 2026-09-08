@@ -10,7 +10,7 @@ The SHA-256 round constants and algorithm in `main.js` implement a published cry
 
 The module interoperates with systems that are not part of this project:
 
-- Goated (`goated.cx`), including its DOM structure and player
+- Goated (`stellar.gdn`), including its DOM structure and player
 - A source-resolution API currently hosted at `api.reallyfast.xyz`
 - Media providers and hosts selected by the target website
 - TizenBrew, Samsung Tizen, and Samsung TV browser APIs

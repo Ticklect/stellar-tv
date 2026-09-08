@@ -339,6 +339,6 @@ class MainActivity : Activity() {
     }
 
     private companion object {
-        const val HOME_URL = "https://goated.cx/"
+        const val HOME_URL = "https://stellar.gdn/"
     }
 }

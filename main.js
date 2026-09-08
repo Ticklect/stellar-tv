@@ -184,7 +184,7 @@
 
   function installSourceResolverAcceleration() {
     var userAgent = navigator.userAgent || '';
-    if (!/Tizen|SMART-TV/i.test(userAgent) || location.hostname !== 'goated.cx') return;
+    if (!/Tizen|SMART-TV/i.test(userAgent) || location.hostname !== 'stellar.gdn') return;
     if (window.__goatedTvSourceBoost || typeof window.fetch !== 'function') return;
     window.__goatedTvSourceBoost = true;
     var nativeFetch = window.fetch.bind(window);

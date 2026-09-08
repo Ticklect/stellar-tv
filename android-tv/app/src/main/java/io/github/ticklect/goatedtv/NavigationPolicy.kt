@@ -10,7 +10,7 @@ internal enum class NavigationDecision {
 }
 
 internal object NavigationPolicy {
-    private const val APP_HOST = "goated.cx"
+    private const val APP_HOST = "stellar.gdn"
 
     fun decide(rawUrl: String): NavigationDecision {
         val uri = runCatching { URI(rawUrl) }.getOrNull() ?: return NavigationDecision.BLOCK

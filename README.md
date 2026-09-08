@@ -11,7 +11,7 @@ This independent project makes the Goated web interface easier to use with a tel
 | Samsung Tizen          | TizenBrew module          | [TizenBrew installation](#samsung-tizen--tizenbrew) |
 | Android TV / Google TV | Native Kotlin WebView APK | [Android TV sideloading](#android-tv--google-tv)    |
 
-The project does not scrape, mirror, index, proxy, or bundle Goated's pages or media. Both builds open the live `https://goated.cx/` site and add TV input compatibility around it.
+The project does not scrape, mirror, index, proxy, or bundle Goated's pages or media. Both builds open the live `https://stellar.gdn/` site and add TV input compatibility around it.
 
 ## Features
 
@@ -39,7 +39,7 @@ No verified screenshots are currently checked in. Contributors may add real devi
 
 - A Samsung TV capable of running TizenBrew
 - TizenBrew 2.0.5 for the confirmed setup; other TizenBrew versions are currently untested
-- Internet access from the TV to `goated.cx`, `api.reallyfast.xyz`, and the media hosts selected by Goated
+- Internet access from the TV to `stellar.gdn`, `api.reallyfast.xyz`, and the media hosts selected by Goated
 - A PC and TV on the same local network for initial TizenBrew installation, where required by the TizenBrew installer
 - No runtime npm dependencies
 

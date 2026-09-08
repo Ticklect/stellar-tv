@@ -6,10 +6,10 @@ import org.junit.Test
 class NavigationPolicyTest {
     @Test
     fun loadsOnlySecureGoatedPagesInsideTheApp() {
-        assertEquals(NavigationDecision.LOAD_IN_APP, NavigationPolicy.decide("https://goated.cx/"))
+        assertEquals(NavigationDecision.LOAD_IN_APP, NavigationPolicy.decide("https://stellar.gdn/"))
         assertEquals(
             NavigationDecision.LOAD_IN_APP,
-            NavigationPolicy.decide("https://auth.goated.cx/callback?value=1"),
+            NavigationPolicy.decide("https://auth.stellar.gdn/callback?value=1"),
         )
     }
 
@@ -25,7 +25,7 @@ class NavigationPolicyTest {
     fun blocksMalformedAndNativeSchemeLinks() {
         assertEquals(NavigationDecision.BLOCK, NavigationPolicy.decide("javascript:alert(1)"))
         assertEquals(NavigationDecision.BLOCK, NavigationPolicy.decide("intent://example/#Intent;end"))
-        assertEquals(NavigationDecision.BLOCK, NavigationPolicy.decide("http://goated.cx/insecure"))
+        assertEquals(NavigationDecision.BLOCK, NavigationPolicy.decide("http://stellar.gdn/insecure"))
         assertEquals(NavigationDecision.BLOCK, NavigationPolicy.decide("not a url"))
     }
 
@@ -33,7 +33,7 @@ class NavigationPolicyTest {
     fun doesNotAcceptLookalikeHosts() {
         assertEquals(
             NavigationDecision.OPEN_EXTERNALLY,
-            NavigationPolicy.decide("https://goated.cx.example.com/"),
+            NavigationPolicy.decide("https://stellar.gdn.example.com/"),
         )
     }
 }

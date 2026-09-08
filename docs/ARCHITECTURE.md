@@ -11,7 +11,7 @@ The native Kotlin application under `android-tv/` opens the same live site in a 
 ```text
 TizenBrew module metadata
           |
-          +--> opens https://goated.cx/
+          +--> opens https://stellar.gdn/
           |
           +--> injects main.js
                     |
@@ -22,7 +22,7 @@ TizenBrew module metadata
 
 Android TV launcher
           |
-          +--> secure fullscreen WebView opens https://goated.cx/
+          +--> secure fullscreen WebView opens https://stellar.gdn/
           |
           +--> native Android remote events
                     |
@@ -99,7 +99,7 @@ On `/watch/` routes, Left/Right seek 15 seconds when focus is not on a player bu
 Source acceleration is deliberately gated to:
 
 - A `Tizen` or `SMART-TV` user agent
-- The exact `goated.cx` hostname
+- The exact `stellar.gdn` hostname
 - The top frame
 
 The module wraps `window.fetch` and recognizes only the challenge, resolve, and subtitles endpoints at `api.reallyfast.xyz`. When the page requests a challenge, the wrapper starts computing the required SHA-256 prefix proof in one Web Worker, while returning an equivalent challenge payload with zero foreground difficulty. When the page submits the matching resolve/subtitle request, the wrapper waits for the actual worker nonce and substitutes it into a copied request body.

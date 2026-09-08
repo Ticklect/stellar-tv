@@ -1,6 +1,6 @@
 # Android TV build
 
-This directory contains the native Android TV / Google TV host. It opens the real `https://goated.cx/` site in a fullscreen WebView and adapts Android D-pad and media keys to the repository's existing TV-navigation contract.
+This directory contains the native Android TV / Google TV host. It opens the real `https://stellar.gdn/` site in a fullscreen WebView and adapts Android D-pad and media keys to the repository's existing TV-navigation contract.
 
 It does not contain a copy of the target site or media. The root Tizen/TizenBrew package remains independent and unchanged in structure.
 
