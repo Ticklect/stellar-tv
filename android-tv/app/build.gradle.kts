@@ -4,7 +4,7 @@ plugins {
     id("com.android.application")
 }
 
-val appVersion = "0.5.2"
+val appVersion = "0.5.3"
 val generatedNavigationAssets = layout.buildDirectory.dir("generated/tv-navigation-assets")
 
 val syncTvNavigation by tasks.registering(Copy::class) {
@@ -22,7 +22,7 @@ android {
         applicationId = "io.github.ticklect.goatedtv"
         minSdk = 23
         targetSdk = 36
-        versionCode = 7
+        versionCode = 8
         versionName = appVersion
 
         testInstrumentationRunner = "android.test.InstrumentationTestRunner"

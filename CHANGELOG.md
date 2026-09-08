@@ -4,11 +4,18 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-09-08
+
 ### Changed
 
 - Rebranded the user-facing Tizen and Android TV application from Goated to Stellar after the target website moved to `stellar.gdn`.
-- Renamed CI and release-workflow artifacts to use `stellar-*` names.
-- Kept the Android package ID, signing-secret names, and legacy diagnostic identifiers stable so existing installs and CI configuration are not broken by the branding change.
+- Replaced the Android launcher icon with the provided Stellar star-and-orbit artwork.
+- Renamed the repository/package metadata and release artifacts to Stellar naming while preserving the Android package ID and signing identity for upgrades.
+- Updated GitHub/install links for the renamed `Ticklect/stellar-tv` repository.
+
+### Fixed
+
+- Point both TV hosts and trusted navigation policy at `https://stellar.gdn/`.
 
 ## [0.5.2] - 2026-08-13
 
