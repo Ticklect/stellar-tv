@@ -1,7 +1,7 @@
 {
-  "name": "goated-tizenbrew",
+  "name": "stellar-tv",
   "appName": "Stellar",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "TV remote navigation and playback compatibility for Stellar on Tizen and Android TV.",
   "packageType": "mods",
   "websiteURL": "https://stellar.gdn/",
@@ -19,12 +19,12 @@
   "license": "LGPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Ticklect/goated-tizenbrew.git"
+    "url": "git+https://github.com/Ticklect/stellar-tv.git"
   },
   "bugs": {
-    "url": "https://github.com/Ticklect/goated-tizenbrew/issues"
+    "url": "https://github.com/Ticklect/stellar-tv/issues"
   },
-  "homepage": "https://github.com/Ticklect/goated-tizenbrew#readme",
+  "homepage": "https://github.com/Ticklect/stellar-tv#readme",
   "keywords": [
     "stellar",
     "tizen",

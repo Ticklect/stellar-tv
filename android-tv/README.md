@@ -36,10 +36,10 @@ This is the easiest installation method for the published v0.5.2 release and doe
 
 1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
 2. Enter code **`1531040`**.
-3. Download the Goated Android TV APK.
+3. Download the Stellar TV APK.
 4. If Android asks for permission, allow Downloader to install unknown apps.
 5. Return to Downloader and install the APK.
-6. Launch **Goated TV (Unofficial)** from the TV's Apps screen.
+6. Launch **Stellar TV** from the TV's Apps screen.
 
 You can also open the clickable Downloader link: [https://aftv.news/1531040](https://aftv.news/1531040).
 
@@ -47,7 +47,7 @@ You can also open the clickable Downloader link: [https://aftv.news/1531040](htt
 
 ### Alternative: direct GitHub download
 
-Download the signed [`goated-android-tv-v0.5.2.apk`](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.2/goated-android-tv-v0.5.2.apk) directly from [GitHub Release v0.5.2](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.2).
+Download the signed [`stellar-android-tv-v0.5.3.apk`](https://github.com/Ticklect/stellar-tv/releases/download/v0.5.3/stellar-android-tv-v0.5.3.apk) directly from [GitHub Release v0.5.3](https://github.com/Ticklect/stellar-tv/releases/tag/v0.5.3).
 
 ### Alternative: ADB installation
 
@@ -90,7 +90,7 @@ Port `5555` is not universal. Use the address and port shown by the TV or follow
 From the directory containing the downloaded APK, install or update it without clearing the saved session:
 
 ```sh
-adb install -r goated-android-tv-v0.5.2.apk
+adb install -r stellar-android-tv-v0.5.3.apk
 ```
 
 The TV may display an installation confirmation. After installation, open **Goated TV (Unofficial)** from the TV's Apps screen.

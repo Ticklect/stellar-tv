@@ -1,8 +1,8 @@
 # Stellar TV Compatibility Layer
 
 [![License: LGPL-3.0-only](https://img.shields.io/badge/license-LGPL--3.0--only-blue.svg)](LICENSE)
-[![CI](https://github.com/Ticklect/goated-tizenbrew/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ticklect/goated-tizenbrew/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/Ticklect/goated-tizenbrew)](https://github.com/Ticklect/goated-tizenbrew/releases/latest)
+[![CI](https://github.com/Ticklect/stellar-tv/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Ticklect/stellar-tv/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/Ticklect/stellar-tv)](https://github.com/Ticklect/stellar-tv/releases/latest)
 
 This independent project makes the Stellar web interface easier to use with a television remote. One repository produces two platform builds while leaving the website itself hosted and operated separately by Stellar.
 
@@ -64,18 +64,16 @@ Follow the upstream [TizenBrew installation guide](https://github.com/reisxd/Tiz
 
 #### 2. Install this module from GitHub
 
-> **Current source note:** the repository source is now branded **Stellar**, but the published `v0.5.2` tag predates this rebrand. The pinned v0.5.2 release therefore still shows the previous Goated branding until a new release is published.
-
 1. Open TizenBrew on the TV.
 2. Open the module manager and choose the GitHub source.
-3. Enter `Ticklect/goated-tizenbrew@0.5.2` for the latest published release.
-4. Confirm that **Goated** appears with the expected version, then launch it.
+3. Enter `Ticklect/stellar-tv@0.5.3` for the latest published release.
+4. Confirm that **Stellar** appears with version **0.5.3**, then launch it.
 
 Pinning a version is recommended because it makes updates deliberate and avoids stale module-script identities in TizenBrew 2.0.5.
 
 #### npm installation
 
-TizenBrew supports npm-backed modules in general, but `goated-tizenbrew` is not currently published to the npm registry. Do not use an npm package with this name unless the repository maintainers announce and link an official package. GitHub installation is the supported method today.
+TizenBrew supports npm-backed modules in general, but `stellar-tv` is not currently published to the npm registry. Do not use an npm package with this name unless the repository maintainers announce and link an official package. GitHub installation is the supported method today.
 
 #### Updating
 
@@ -88,37 +86,27 @@ Using a new explicit version is important because TizenBrew 2.0.5 can retain an 
 
 ### Android TV / Google TV
 
-> **Current source note:** current CI builds are branded **Stellar TV** and open `stellar.gdn`. The signed `v0.5.2` release below predates the rebrand and still carries the previous name and artwork.
-
-#### Current Stellar test APK
-
-Each CI run uploads a fresh debug APK artifact named **`stellar-android-tv-debug`**. Use that build to test the current Stellar source before the next signed release.
-
 #### Recommended: Downloader app
 
-This is the easiest installation method for the published v0.5.2 release and does not require a computer:
+This is the easiest installation method and does not require a computer:
 
 1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
-2. Enter code **`1531040`**.
-3. Download the Goated Android TV APK.
+2. Use the current Stellar Downloader code listed in this section after the v0.5.3 release is published.
+3. Download the Stellar TV APK.
 4. If Android asks for permission, allow Downloader to install unknown apps.
 5. Return to Downloader and install the APK.
-6. Launch **Goated TV (Unofficial)** from the TV's Apps screen.
-
-You can also open the clickable Downloader link: [https://aftv.news/1531040](https://aftv.news/1531040).
-
-> **Version note:** Code `1531040` points directly to the signed **v0.5.2** APK.
+6. Launch **Stellar TV** from the TV's Apps screen.
 
 #### Alternative: direct GitHub download
 
-Download the signed [`goated-android-tv-v0.5.2.apk`](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.2/goated-android-tv-v0.5.2.apk) directly from [GitHub Release v0.5.2](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.2).
+Download the signed [`stellar-android-tv-v0.5.3.apk`](https://github.com/Ticklect/stellar-tv/releases/download/v0.5.3/stellar-android-tv-v0.5.3.apk) directly from [GitHub Release v0.5.3](https://github.com/Ticklect/stellar-tv/releases/tag/v0.5.3).
 
 #### Alternative: ADB installation
 
 Developers and advanced users can install the downloaded release APK through ADB:
 
 ```sh
-adb install -r goated-android-tv-v0.5.2.apk
+adb install -r stellar-android-tv-v0.5.3.apk
 ```
 
 For ADB setup, troubleshooting, and the collapsed developer/debug build instructions, see the [complete Android TV installation guide](android-tv/README.md#install-on-an-android-tv-or-google-tv).
@@ -151,7 +139,7 @@ These physical remote models are expected-compatible, not yet project-confirmed.
 Node.js is used for shared repository tooling and Tizen tests. Gradle builds the native Android TV host. TizenBrew still injects the root `main.js` directly in the TV browser.
 
 ```sh
-git clone https://github.com/Ticklect/goated-tizenbrew.git
+git clone https://github.com/Ticklect/stellar-tv.git
 cd goated-tizenbrew
 npm ci
 npm run validate
@@ -198,7 +186,7 @@ The object contains the module version plus an error area, message, and timestam
 
 ### The module does not appear
 
-- Confirm the GitHub identifier and capitalization: `Ticklect/goated-tizenbrew@<version>`.
+- Confirm the GitHub identifier and capitalization: `Ticklect/stellar-tv@<version>`.
 - Confirm the TV has network access and TizenBrew can reach jsDelivr/GitHub-backed module files.
 - If TizenBrew shows **Unknown Module**, remove the entry and add the complete identifier again.
 
