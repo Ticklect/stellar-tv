@@ -1,0 +1,127 @@
+name: Prepare v0.5.3 source
+
+on:
+  push:
+    branches:
+      - release-v0.5.3
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release-v0.5.3
+          fetch-depth: 0
+
+      - name: Apply v0.5.3 metadata and branding updates
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          def replace_exact(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'Expected text not found in {path}: {old!r}')
+              p.write_text(text.replace(old, new), encoding='utf-8')
+
+          package_path = Path('package.json')
+          package = json.loads(package_path.read_text(encoding='utf-8'))
+          package['name'] = 'stellar-tv'
+          package['version'] = '0.5.3'
+          package['repository']['url'] = 'git+https://github.com/Ticklect/stellar-tv.git'
+          package['bugs']['url'] = 'https://github.com/Ticklect/stellar-tv/issues'
+          package['homepage'] = 'https://github.com/Ticklect/stellar-tv#readme'
+          package_path.write_text(json.dumps(package, indent=2) + '\n', encoding='utf-8')
+
+          lock_path = Path('package-lock.json')
+          lock = json.loads(lock_path.read_text(encoding='utf-8'))
+          lock['name'] = 'stellar-tv'
+          lock['version'] = '0.5.3'
+          lock['packages']['']['name'] = 'stellar-tv'
+          lock['packages']['']['version'] = '0.5.3'
+          lock_path.write_text(json.dumps(lock, indent=2) + '\n', encoding='utf-8')
+
+          replace_exact('main.js', "var MODULE_VERSION = '0.5.2';", "var MODULE_VERSION = '0.5.3';")
+          replace_exact('android-tv/app/build.gradle.kts', 'val appVersion = "0.5.2"', 'val appVersion = "0.5.3"')
+          replace_exact('android-tv/app/build.gradle.kts', 'versionCode = 7', 'versionCode = 8')
+          replace_exact('android-tv/app/src/main/AndroidManifest.xml', 'android:icon="@mipmap/ic_launcher"', 'android:icon="@drawable/stellar_app_icon"')
+          replace_exact('android-tv/app/src/main/AndroidManifest.xml', 'android:roundIcon="@mipmap/ic_launcher_round"', 'android:roundIcon="@drawable/stellar_app_icon"')
+
+          for name in ['README.md', 'android-tv/README.md']:
+              p = Path(name)
+              text = p.read_text(encoding='utf-8')
+              text = text.replace('Ticklect/goated-tizenbrew', 'Ticklect/stellar-tv')
+              p.write_text(text, encoding='utf-8')
+
+          readme = Path('README.md')
+          text = readme.read_text(encoding='utf-8')
+          text = text.replace(
+              '> **Current source note:** the repository source is now branded **Stellar**, but the published `v0.5.2` tag predates this rebrand. The pinned v0.5.2 release therefore still shows the previous Goated branding until a new release is published.\n\n',
+              ''
+          )
+          text = text.replace('Ticklect/stellar-tv@0.5.2', 'Ticklect/stellar-tv@0.5.3')
+          text = text.replace('Confirm that **Goated** appears with the expected version, then launch it.', 'Confirm that **Stellar** appears with version **0.5.3**, then launch it.')
+          text = text.replace('`goated-tizenbrew` is not currently published', '`stellar-tv` is not currently published')
+          text = text.replace(
+              '> **Current source note:** current CI builds are branded **Stellar TV** and open `stellar.gdn`. The signed `v0.5.2` release below predates the rebrand and still carries the previous name and artwork.\n\n#### Current Stellar test APK\n\nEach CI run uploads a fresh debug APK artifact named **`stellar-android-tv-debug`**. Use that build to test the current Stellar source before the next signed release.\n\n',
+              ''
+          )
+          text = text.replace('This is the easiest installation method for the published v0.5.2 release and does not require a computer:', 'This is the easiest installation method and does not require a computer:')
+          text = text.replace('Enter code **`1531040`**.', 'Use the current Stellar Downloader code listed in this section after the v0.5.3 release is published.')
+          text = text.replace('Download the Goated Android TV APK.', 'Download the Stellar TV APK.')
+          text = text.replace('Launch **Goated TV (Unofficial)** from the TV\'s Apps screen.', 'Launch **Stellar TV** from the TV\'s Apps screen.')
+          text = text.replace('You can also open the clickable Downloader link: [https://aftv.news/1531040](https://aftv.news/1531040).\n\n> **Version note:** Code `1531040` points directly to the signed **v0.5.2** APK.\n\n', '')
+          text = text.replace('`goated-android-tv-v0.5.2.apk`', '`stellar-android-tv-v0.5.3.apk`')
+          text = text.replace('/releases/download/v0.5.2/goated-android-tv-v0.5.2.apk', '/releases/download/v0.5.3/stellar-android-tv-v0.5.3.apk')
+          text = text.replace('GitHub Release v0.5.2', 'GitHub Release v0.5.3')
+          text = text.replace('/releases/tag/v0.5.2', '/releases/tag/v0.5.3')
+          text = text.replace('adb install -r goated-android-tv-v0.5.2.apk', 'adb install -r stellar-android-tv-v0.5.3.apk')
+          readme.write_text(text, encoding='utf-8')
+
+          android_readme = Path('android-tv/README.md')
+          text = android_readme.read_text(encoding='utf-8')
+          text = text.replace('Download the Goated Android TV APK.', 'Download the Stellar TV APK.')
+          text = text.replace('Launch **Goated TV (Unofficial)** from the TV\'s Apps screen.', 'Launch **Stellar TV** from the TV\'s Apps screen.')
+          text = text.replace('`goated-android-tv-v0.5.2.apk`', '`stellar-android-tv-v0.5.3.apk`')
+          text = text.replace('/releases/download/v0.5.2/goated-android-tv-v0.5.2.apk', '/releases/download/v0.5.3/stellar-android-tv-v0.5.3.apk')
+          text = text.replace('GitHub Release v0.5.2', 'GitHub Release v0.5.3')
+          text = text.replace('/releases/tag/v0.5.2', '/releases/tag/v0.5.3')
+          text = text.replace('adb install -r goated-android-tv-v0.5.2.apk', 'adb install -r stellar-android-tv-v0.5.3.apk')
+          android_readme.write_text(text, encoding='utf-8')
+
+          changelog = Path('CHANGELOG.md')
+          text = changelog.read_text(encoding='utf-8')
+          marker = '## [Unreleased]\n\n### Changed\n\n'
+          if marker not in text:
+              raise SystemExit('Unexpected changelog structure')
+          replacement = (
+              '## [Unreleased]\n\n'
+              '## [0.5.3] - 2026-09-08\n\n'
+              '### Changed\n\n'
+              '- Rebranded the user-facing Tizen and Android TV application from Goated to Stellar after the target website moved to `stellar.gdn`.\n'
+              '- Replaced the Android launcher icon with the provided Stellar star-and-orbit artwork.\n'
+              '- Renamed the repository/package metadata and release artifacts to Stellar naming while preserving the Android package ID and signing identity for upgrades.\n'
+              '- Updated GitHub/install links for the renamed `Ticklect/stellar-tv` repository.\n\n'
+              '### Fixed\n\n'
+              '- Point both TV hosts and trusted navigation policy at `https://stellar.gdn/`.\n\n'
+          )
+          start = text.index(marker)
+          next_release = text.index('## [0.5.2]', start)
+          text = text[:start] + replacement + text[next_release:]
+          changelog.write_text(text, encoding='utf-8')
+
+      - name: Commit prepared source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json main.js android-tv/app/build.gradle.kts android-tv/app/src/main/AndroidManifest.xml README.md android-tv/README.md CHANGELOG.md
+          git commit -m "Prepare Stellar TV v0.5.3 source"
+          git push origin HEAD:release-v0.5.3
