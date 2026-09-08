@@ -1,0 +1,139 @@
+name: Publish Stellar TV v1.0.0
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Build, publish, and retire pre-1.0 releases
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_KEYSTORE_BASE64: ${{ secrets.GOATED_ANDROID_KEYSTORE_BASE64 }}
+      GOATED_ANDROID_STORE_PASSWORD: ${{ secrets.GOATED_ANDROID_STORE_PASSWORD }}
+      GOATED_ANDROID_KEY_ALIAS: ${{ secrets.GOATED_ANDROID_KEY_ALIAS }}
+      GOATED_ANDROID_KEY_PASSWORD: ${{ secrets.GOATED_ANDROID_KEY_PASSWORD }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Confirm v1.0.0 source and release state
+        id: release
+        run: |
+          VERSION="$(node -p 'require("./package.json").version')"
+          test "$VERSION" = "1.0.0"
+          if gh release view v1.0.0 >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node.js
+        if: steps.release.outputs.exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Validate source
+        if: steps.release.outputs.exists != 'true'
+        run: |
+          npm ci
+          npm run validate
+
+      - name: Package TizenBrew
+        if: steps.release.outputs.exists != 'true'
+        run: |
+          mkdir -p dist
+          zip -r dist/stellar-tizenbrew-v1.0.0.zip \
+            package.json main.js app LICENSE LICENSE.GPL README.md CHANGELOG.md THIRD_PARTY_NOTICES.md
+
+      - name: Set up Java
+        if: steps.release.outputs.exists != 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Set up Android SDK
+        if: steps.release.outputs.exists != 'true'
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ''
+
+      - name: Install Android SDK packages
+        if: steps.release.outputs.exists != 'true'
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Require release signing key
+        if: steps.release.outputs.exists != 'true'
+        run: |
+          test -n "$RELEASE_KEYSTORE_BASE64"
+          test -n "$GOATED_ANDROID_STORE_PASSWORD"
+          test -n "$GOATED_ANDROID_KEY_ALIAS"
+          test -n "$GOATED_ANDROID_KEY_PASSWORD"
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/stellar-release.jks"
+          echo "GOATED_ANDROID_KEYSTORE=$RUNNER_TEMP/stellar-release.jks" >> "$GITHUB_ENV"
+
+      - name: Test, lint, and build signed Android release
+        if: steps.release.outputs.exists != 'true'
+        working-directory: android-tv
+        run: ./gradlew testDebugUnitTest lintRelease assembleRelease
+
+      - name: Prepare signed release assets
+        if: steps.release.outputs.exists != 'true'
+        run: |
+          APK="$(find android-tv/app/build/outputs/apk/release -name '*.apk' -print -quit)"
+          test -n "$APK"
+          case "$APK" in
+            *-unsigned.apk) echo "Release APK is unsigned" >&2; exit 1 ;;
+          esac
+          cp "$APK" dist/stellar-android-tv-v1.0.0.apk
+          sha256sum dist/stellar-android-tv-v1.0.0.apk dist/stellar-tizenbrew-v1.0.0.zip | tee dist/SHA256SUMS.txt
+
+      - name: Create v1.0.0 tag and GitHub release
+        if: steps.release.outputs.exists != 'true'
+        run: |
+          if ! git ls-remote --exit-code --tags origin refs/tags/v1.0.0 >/dev/null 2>&1; then
+            git tag v1.0.0 "$GITHUB_SHA"
+            git push origin refs/tags/v1.0.0
+          fi
+          gh release create v1.0.0 \
+            dist/stellar-android-tv-v1.0.0.apk \
+            dist/stellar-tizenbrew-v1.0.0.zip \
+            dist/SHA256SUMS.txt \
+            --target "$GITHUB_SHA" \
+            --title "Stellar TV v1.0.0" \
+            --notes "First stable Stellar TV release for https://stellar.gdn/. Includes the signed Android TV APK and TizenBrew package, with the Stellar star-and-orbit launcher artwork. Pre-1.0 releases are retired because they target the obsolete Goated setup or contain superseded release assets."
+
+      - name: Remove obsolete pre-1.0 releases and version tags
+        if: steps.release.outputs.exists != 'true'
+        run: |
+          gh release list --limit 100 --json tagName --jq '.[].tagName' | while read -r tag; do
+            [ -z "$tag" ] && continue
+            [ "$tag" = "v1.0.0" ] && continue
+            gh release delete "$tag" --cleanup-tag --yes
+          done
+
+          git ls-remote --tags --refs origin 'refs/tags/v*' | awk '{sub("refs/tags/", "", $2); print $2}' | while read -r tag; do
+            [ -z "$tag" ] && continue
+            [ "$tag" = "v1.0.0" ] && continue
+            git push origin ":refs/tags/$tag"
+          done
+
+      - name: Remove obsolete release branches
+        if: steps.release.outputs.exists != 'true'
+        run: |
+          git ls-remote --heads origin 'refs/heads/release-v*' | awk '{sub("refs/heads/", "", $2); print $2}' | while read -r branch; do
+            [ -z "$branch" ] && continue
+            git push origin ":refs/heads/$branch"
+          done
