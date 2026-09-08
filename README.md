@@ -66,8 +66,8 @@ Follow the upstream [TizenBrew installation guide](https://github.com/reisxd/Tiz
 
 1. Open TizenBrew on the TV.
 2. Open the module manager and choose the GitHub source.
-3. Enter `Ticklect/stellar-tv@0.5.3` for the latest published release.
-4. Confirm that **Stellar** appears with version **0.5.3**, then launch it.
+3. Enter `Ticklect/stellar-tv@1.0.0` for the latest published release.
+4. Confirm that **Stellar** appears with version **1.0.0**, then launch it.
 
 Pinning a version is recommended because it makes updates deliberate and avoids stale module-script identities in TizenBrew 2.0.5.
 
@@ -91,7 +91,7 @@ Using a new explicit version is important because TizenBrew 2.0.5 can retain an 
 This is the easiest installation method and does not require a computer:
 
 1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
-2. Use the current Stellar Downloader code listed in this section after the v0.5.3 release is published.
+2. Use the current Stellar Downloader code listed in this section after the v1.0.0 release is published.
 3. Download the Stellar TV APK.
 4. If Android asks for permission, allow Downloader to install unknown apps.
 5. Return to Downloader and install the APK.
@@ -99,14 +99,14 @@ This is the easiest installation method and does not require a computer:
 
 #### Alternative: direct GitHub download
 
-Download the signed [`stellar-android-tv-v0.5.3.apk`](https://github.com/Ticklect/stellar-tv/releases/download/v0.5.3/stellar-android-tv-v0.5.3.apk) directly from [GitHub Release v0.5.3](https://github.com/Ticklect/stellar-tv/releases/tag/v0.5.3).
+Download the signed [`stellar-android-tv-v1.0.0.apk`](https://github.com/Ticklect/stellar-tv/releases/download/v1.0.0/stellar-android-tv-v1.0.0.apk) directly from [GitHub Release v1.0.0](https://github.com/Ticklect/stellar-tv/releases/tag/v1.0.0).
 
 #### Alternative: ADB installation
 
 Developers and advanced users can install the downloaded release APK through ADB:
 
 ```sh
-adb install -r stellar-android-tv-v0.5.3.apk
+adb install -r stellar-android-tv-v1.0.0.apk
 ```
 
 For ADB setup, troubleshooting, and the collapsed developer/debug build instructions, see the [complete Android TV installation guide](android-tv/README.md#install-on-an-android-tv-or-google-tv).

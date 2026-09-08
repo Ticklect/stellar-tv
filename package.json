@@ -1,7 +1,7 @@
 {
   "name": "stellar-tv",
   "appName": "Stellar",
-  "version": "0.5.3",
+  "version": "1.0.0",
   "description": "TV remote navigation and playback compatibility for Stellar on Tizen and Android TV.",
   "packageType": "mods",
   "websiteURL": "https://stellar.gdn/",

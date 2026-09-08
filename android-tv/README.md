@@ -47,7 +47,7 @@ You can also open the clickable Downloader link: [https://aftv.news/1531040](htt
 
 ### Alternative: direct GitHub download
 
-Download the signed [`stellar-android-tv-v0.5.3.apk`](https://github.com/Ticklect/stellar-tv/releases/download/v0.5.3/stellar-android-tv-v0.5.3.apk) directly from [GitHub Release v0.5.3](https://github.com/Ticklect/stellar-tv/releases/tag/v0.5.3).
+Download the signed [`stellar-android-tv-v1.0.0.apk`](https://github.com/Ticklect/stellar-tv/releases/download/v1.0.0/stellar-android-tv-v1.0.0.apk) directly from [GitHub Release v1.0.0](https://github.com/Ticklect/stellar-tv/releases/tag/v1.0.0).
 
 ### Alternative: ADB installation
 
@@ -90,7 +90,7 @@ Port `5555` is not universal. Use the address and port shown by the TV or follow
 From the directory containing the downloaded APK, install or update it without clearing the saved session:
 
 ```sh
-adb install -r stellar-android-tv-v0.5.3.apk
+adb install -r stellar-android-tv-v1.0.0.apk
 ```
 
 The TV may display an installation confirmation. After installation, open **Goated TV (Unofficial)** from the TV's Apps screen.
