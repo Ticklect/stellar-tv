@@ -13,7 +13,7 @@ test('ships Stellar branding for Tizen and Android TV', () => {
 
   assert.equal(packageJson.name, 'stellar-tv');
   assert.equal(packageJson.appName, 'Stellar');
-  assert.equal(packageJson.version, '0.5.3');
+  assert.equal(packageJson.version, '1.0.0');
   assert.match(packageJson.description, /Stellar/);
   assert.doesNotMatch(packageJson.description, /Goated/);
   assert.equal(packageJson.websiteURL, 'https://stellar.gdn/');
@@ -23,8 +23,8 @@ test('ships Stellar branding for Tizen and Android TV', () => {
 
   assert.match(androidStrings, /<string name="app_name">Stellar TV<\/string>/);
   assert.match(androidStrings, /<string name="error_title">Unable to load Stellar<\/string>/);
-  assert.match(androidBuild, /val appVersion = "0\.5\.3"/);
-  assert.match(androidBuild, /versionCode = 8/);
+  assert.match(androidBuild, /val appVersion = "1\.0\.0"/);
+  assert.match(androidBuild, /versionCode = 9/);
   assert.match(fallbackPage, /<title>Stellar<\/title>/);
   assert.match(fallbackPage, /<h1>Opening Stellar&hellip;<\/h1>/);
 
