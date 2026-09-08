@@ -8,7 +8,7 @@ const gradlePath = new URL('../android-tv/app/build.gradle.kts', import.meta.url
 test('Android launcher uses generated Stellar mipmaps from the supplied artwork', async () => {
   const [manifest, gradle] = await Promise.all([
     readFile(manifestPath, 'utf8'),
-    readFile(gradlePath, 'utf8'),
+    readFile(gradlePath, 'utf8')
   ]);
 
   assert.match(manifest, /android:icon="@mipmap\/stellar_launcher"/);
