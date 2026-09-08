@@ -140,7 +140,7 @@ Node.js is used for shared repository tooling and Tizen tests. Gradle builds the
 
 ```sh
 git clone https://github.com/Ticklect/stellar-tv.git
-cd goated-tizenbrew
+cd stellar-tv
 npm ci
 npm run validate
 cd android-tv
