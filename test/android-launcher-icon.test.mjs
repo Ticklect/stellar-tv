@@ -1,24 +1,18 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
 import test from 'node:test';
 
-const releaseManifestPath = new URL(
-  '../android-tv/app/src/release/AndroidManifest.xml',
-  import.meta.url
-);
-const iconScriptPath = new URL('../scripts/prepare-stellar-icons.py', import.meta.url);
+const read = (path) => fs.readFileSync(new URL(path, import.meta.url), 'utf8');
 
-test('Android release launcher uses generated Stellar mipmaps from the supplied artwork', async () => {
-  const [releaseManifest, iconScript] = await Promise.all([
-    readFile(releaseManifestPath, 'utf8'),
-    readFile(iconScriptPath, 'utf8')
-  ]);
+test('Android launcher uses the supplied Stellar artwork', () => {
+  const manifest = read('../android-tv/app/src/main/AndroidManifest.xml');
+  const source = fs.readFileSync(
+    new URL('../android-tv/app/src/main/res/drawable-nodpi/stellar_app_icon.png', import.meta.url)
+  );
+  const digest = createHash('sha256').update(source).digest('hex');
 
-  assert.match(releaseManifest, /android:icon="@mipmap\/stellar_launcher"/);
-  assert.match(releaseManifest, /android:roundIcon="@mipmap\/stellar_launcher_round"/);
-  assert.match(iconScript, /stellar_app_icon\.png/);
-  assert.match(iconScript, /"mdpi": 48/);
-  assert.match(iconScript, /"xxxhdpi": 192/);
-  assert.match(iconScript, /stellar_launcher\.png/);
-  assert.match(iconScript, /stellar_launcher_round\.png/);
+  assert.equal(digest, '9b2ea8ddb1ea6af041f3583f1bea6c005c25fb348defa435baf551009550f217');
+  assert.match(manifest, /android:icon="@mipmap\/ic_launcher"/);
+  assert.match(manifest, /android:roundIcon="@mipmap\/ic_launcher_round"/);
 });

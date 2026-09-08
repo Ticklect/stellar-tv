@@ -1,8 +1,17 @@
 # Changelog
 
-All notable changes to this project are documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) while the public API remains pre-1.0.
+All notable changes to this project are documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.0] - 2026-09-08
+
+### Changed
+
+- First stable Stellar TV release for `https://stellar.gdn/`.
+- Uses the supplied Stellar star-and-orbit artwork as the canonical Android TV launcher icon.
+- Synchronizes the TizenBrew package and Android TV app at version `1.0.0`.
+- Removes the temporary v0.5.3 icon-repair and release workflows.
 
 ## [0.5.3] - 2026-09-08
 
