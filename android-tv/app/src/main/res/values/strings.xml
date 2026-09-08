@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Goated TV (Unofficial)</string>
-    <string name="error_title">Unable to load Goated</string>
+    <string name="app_name">Stellar TV</string>
+    <string name="error_title">Unable to load Stellar</string>
     <string name="error_message">Check this TV\'s internet connection, then try again.</string>
     <string name="error_ssl">A secure connection could not be established. The page was not loaded.</string>
     <string name="retry">Try again</string>

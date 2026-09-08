@@ -24,28 +24,31 @@ On Windows, use `gradlew.bat`. The debug APK is written to `app/build/outputs/ap
 
 ## Install on an Android TV or Google TV
 
-### Recommended: Downloader app
+### Current Stellar test build
 
-This is the easiest installation method and does not require a computer:
+GitHub Actions builds the current source on every CI run and uploads the debug APK as **`stellar-android-tv-debug`**. Use that artifact to test the Stellar branding and `stellar.gdn` integration before the next signed release.
+
+The app appears as **Stellar TV** on Android TV / Google TV. The Android package ID intentionally remains `io.github.ticklect.goatedtv` so existing installs and signing continuity are not broken by the branding change.
+
+### Published v0.5.2 release
+
+The existing signed v0.5.2 APK predates the Stellar rebrand and still carries the previous branding and artwork. The historical Downloader details below remain accurate for that release only.
+
+#### Downloader app
 
 1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
 2. Enter code **`1531040`**.
-3. Download the Goated Android TV APK.
+3. Download the v0.5.2 Android TV APK.
 4. If Android asks for permission, allow Downloader to install unknown apps.
 5. Return to Downloader and install the APK.
-6. Launch **Goated TV (Unofficial)** from the TV's Apps screen.
 
 You can also open the clickable Downloader link: [https://aftv.news/1531040](https://aftv.news/1531040).
 
-> **Version note:** Code `1531040` points directly to the signed **v0.5.2** APK.
+> **Version note:** Code `1531040` points directly to the signed **v0.5.2** APK and therefore does not contain the current Stellar rebrand.
 
-### Alternative: direct GitHub download
+### Build and install the current source with ADB
 
-Download the signed [`goated-android-tv-v0.5.2.apk`](https://github.com/Ticklect/goated-tizenbrew/releases/download/v0.5.2/goated-android-tv-v0.5.2.apk) directly from [GitHub Release v0.5.2](https://github.com/Ticklect/goated-tizenbrew/releases/tag/v0.5.2).
-
-### Alternative: ADB installation
-
-ADB is intended for advanced users and developers. Download the signed release APK above before continuing. Setting names vary by manufacturer, and the TV and computer should be on the same local network when using wireless ADB.
+ADB is intended for advanced users and developers. The TV and computer should be on the same local network when using wireless ADB.
 
 #### 1. Enable developer options
 
@@ -79,40 +82,16 @@ adb devices
 
 Port `5555` is not universal. Use the address and port shown by the TV or follow the device manufacturer's debugging instructions.
 
-#### 3. Install the release APK
+#### 3. Build and install the current debug APK
 
-From the directory containing the downloaded APK, install or update it without clearing the saved session:
-
-```sh
-adb install -r goated-android-tv-v0.5.2.apk
-```
-
-The TV may display an installation confirmation. After installation, open **Goated TV (Unofficial)** from the TV's Apps screen.
-
-<details>
-<summary>Developer-only: build and install a debug APK</summary>
-
-From this `android-tv` directory, build the debug APK:
+From this `android-tv` directory:
 
 ```sh
 ./gradlew testDebugUnitTest lintDebug assembleDebug
-```
-
-On Windows, run `gradlew.bat testDebugUnitTest lintDebug assembleDebug`. Then install it with:
-
-```sh
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-A debug build can also be launched from ADB with:
-
-```sh
-adb shell monkey -p io.github.ticklect.goatedtv.debug -c android.intent.category.LEANBACK_LAUNCHER 1
-```
-
-Debug APKs use a local Android debug key and are for development testing only. They are not the recommended installation method and cannot update a differently signed public release APK.
-
-</details>
+On Windows, use `gradlew.bat` for the Gradle command. Debug builds use the `.debug` application ID suffix and a local Android debug key.
 
 #### 4. Test the remote
 
@@ -137,12 +116,14 @@ Confirm that:
 
 ## Release signing
 
-An unsigned release APK can be produced with `./gradlew assembleRelease`. For an intentionally signed build, set all four environment variables before running Gradle:
+An unsigned release APK can be produced with `./gradlew assembleRelease`. For an intentionally signed build, set all four existing environment variables before running Gradle:
 
 - `GOATED_ANDROID_KEYSTORE`: absolute path to the keystore
 - `GOATED_ANDROID_STORE_PASSWORD`: keystore password
 - `GOATED_ANDROID_KEY_ALIAS`: signing-key alias
-- `GOATED_ANDROID_KEY_PASSWORD`: signing-key password
+- `GOATED_ANDROID_KEY_PASSWORD`: keystore password
+
+These variable names are retained as internal compatibility identifiers so existing CI secrets continue to work. They are not user-facing branding.
 
 Never commit the keystore or any password. CI should provide these values through repository secrets only for an intentional release-signing run.
 
@@ -150,11 +131,11 @@ The tag-artifact workflow expects the keystore itself as a base64-encoded `GOATE
 
 ## Security model
 
-- HTTPS-only navigation for Goated pages; ordinary external web links leave the app.
+- HTTPS-only navigation for Stellar pages; ordinary external web links leave the app.
 - TLS errors are cancelled, never bypassed.
 - File/content access, universal file URL access, geolocation, WebView permission requests, mixed content, and JavaScript-opened windows are disabled.
 - No `addJavascriptInterface` bridge is exposed to web content.
 - Cookies and DOM storage remain available for normal site sessions; third-party cookies are disabled.
 - WebView debugging and app logs are enabled only in debug builds.
 
-The generic icon and TV banner are placeholders and should be replaced with reviewed, independently owned artwork before public distribution.
+The current launcher icon and TV banner are temporary legacy artwork and will be replaced in a separate branding pass.

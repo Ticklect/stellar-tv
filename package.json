@@ -1,8 +1,8 @@
 {
   "name": "goated-tizenbrew",
-  "appName": "Goated",
+  "appName": "Stellar",
   "version": "0.5.2",
-  "description": "TV remote navigation and playback compatibility for Goated on Tizen and Android TV.",
+  "description": "TV remote navigation and playback compatibility for Stellar on Tizen and Android TV.",
   "packageType": "mods",
   "websiteURL": "https://stellar.gdn/",
   "main": "main.js",
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/Ticklect/goated-tizenbrew#readme",
   "keywords": [
+    "stellar",
     "tizen",
     "tizenbrew",
     "samsung-tv",
