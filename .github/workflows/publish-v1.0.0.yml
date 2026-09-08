@@ -115,8 +115,10 @@ jobs:
             --title "Stellar TV v1.0.0" \
             --notes "First stable Stellar TV release for https://stellar.gdn/. Includes the signed Android TV APK and TizenBrew package, with the Stellar star-and-orbit launcher artwork. Pre-1.0 releases are retired because they target the obsolete Goated setup or contain superseded release assets."
 
+      - name: Verify v1.0.0 release exists before cleanup
+        run: gh release view v1.0.0 >/dev/null
+
       - name: Remove obsolete pre-1.0 releases and version tags
-        if: steps.release.outputs.exists != 'true'
         run: |
           gh release list --limit 100 --json tagName --jq '.[].tagName' | while read -r tag; do
             [ -z "$tag" ] && continue
@@ -131,7 +133,6 @@ jobs:
           done
 
       - name: Remove obsolete release branches
-        if: steps.release.outputs.exists != 'true'
         run: |
           git ls-remote --heads origin 'refs/heads/release-v*' | awk '{sub("refs/heads/", "", $2); print $2}' | while read -r branch; do
             [ -z "$branch" ] && continue
