@@ -24,9 +24,15 @@ On Windows, use `gradlew.bat`. The debug APK is written to `app/build/outputs/ap
 
 ## Install on an Android TV or Google TV
 
+> **Current source note:** current source builds are branded **Stellar TV** and open `stellar.gdn`. The signed `v0.5.2` release below predates the rebrand and still carries the previous Goated name and artwork.
+
+### Current Stellar test build
+
+GitHub Actions uploads the current debug APK as **`stellar-android-tv-debug`**. Use that artifact to test the Stellar source before the next signed release.
+
 ### Recommended: Downloader app
 
-This is the easiest installation method and does not require a computer:
+This is the easiest installation method for the published v0.5.2 release and does not require a computer:
 
 1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
 2. Enter code **`1531040`**.
@@ -150,7 +156,7 @@ The tag-artifact workflow expects the keystore itself as a base64-encoded `GOATE
 
 ## Security model
 
-- HTTPS-only navigation for Goated pages; ordinary external web links leave the app.
+- HTTPS-only navigation for Stellar pages; ordinary external web links leave the app.
 - TLS errors are cancelled, never bypassed.
 - File/content access, universal file URL access, geolocation, WebView permission requests, mixed content, and JavaScript-opened windows are disabled.
 - No `addJavascriptInterface` bridge is exposed to web content.

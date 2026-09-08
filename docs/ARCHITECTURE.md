@@ -4,7 +4,7 @@
 
 The repository has two independent platform hosts around one remote-navigation contract. It does not host, mirror, scrape, index, proxy, or bundle the target website or its media.
 
-TizenBrew reads the root `package.json`, opens `websiteURL`, registers the requested media keys, and injects root `main.js`. The script exits in nested frames so only the top-level Goated document owns navigation and request interception.
+TizenBrew reads the root `package.json`, opens `websiteURL`, registers the requested media keys, and injects root `main.js`. The script exits in nested frames so only the top-level Stellar document owns navigation and request interception.
 
 The native Kotlin application under `android-tv/` opens the same live site in a fullscreen WebView. Its Gradle build copies root `main.js` into generated Android assets, preserving that proven script as the navigation source of truth without moving or duplicating the Tizen runtime file.
 
@@ -39,7 +39,7 @@ Root `package.json`, `main.js`, and `app/index.html` remain the TizenBrew contra
 
 Android converts native key events into ordinary cancelable keyboard events understood by `main.js`. It uses native-to-web `evaluateJavascript`; it does not expose `addJavascriptInterface` or any privileged Java/Kotlin method to the page. Back first exits native fullscreen, then gives the shared page logic a chance to close a dialog or navigate, and finally leaves the activity when no web history remains.
 
-The Android WebView permits only HTTPS Goated pages in-app. Other HTTP(S) links are offered to an external browser, unsupported schemes are blocked, TLS errors are cancelled, and mixed content and file/content access are disabled. Cookies and DOM storage preserve normal website sessions, while third-party cookies and web permission requests remain disabled.
+The Android WebView permits only HTTPS Stellar pages in-app. Other HTTP(S) links are offered to an external browser, unsupported schemes are blocked, TLS errors are cancelled, and mixed content and file/content access are disabled. Cookies and DOM storage preserve normal website sessions, while third-party cookies and web permission requests remain disabled.
 
 ## Runtime entry and state
 
@@ -52,7 +52,7 @@ The Android WebView permits only HTTPS Goated pages in-app. Other HTTP(S) links 
 - Whether the user has interacted
 - Whether startup has already run
 
-The diagnostic object `window.__goatedTizenBrewDiagnostics` exposes the module version and only the most recent handled error summary.
+For compatibility with existing tooling, the diagnostic object remains available under the legacy internal name `window.__goatedTizenBrewDiagnostics`. It exposes the module version and only the most recent handled error summary.
 
 ## Remote input handling
 
@@ -119,7 +119,7 @@ No proof is skipped: the valid nonce is still computed and sent to the upstream 
 - Offscreen non-priority images receive asynchronous decoding and lazy loading.
 - Proof-of-work runs outside the UI thread.
 
-These optimizations are coupled to the target site's current DOM class patterns. Changes to Goated may require selector maintenance.
+These optimizations are coupled to the target site's current DOM class patterns. Changes to Stellar may require selector maintenance.
 
 ## TizenBrew integration constraints
 

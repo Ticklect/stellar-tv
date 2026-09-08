@@ -52,13 +52,13 @@ jobs:
       - name: Create TizenBrew ZIP
         run: |
           mkdir -p dist
-          zip -r "dist/goated-tizenbrew-v${{ needs.verify.outputs.version }}.zip" \
+          zip -r "dist/stellar-tizenbrew-v${{ needs.verify.outputs.version }}.zip" \
             package.json main.js app LICENSE LICENSE.GPL README.md CHANGELOG.md THIRD_PARTY_NOTICES.md
 
       - name: Upload TizenBrew artifact
         uses: actions/upload-artifact@v4
         with:
-          name: goated-tizenbrew-v${{ needs.verify.outputs.version }}
+          name: stellar-tizenbrew-v${{ needs.verify.outputs.version }}
           path: dist/*.zip
           if-no-files-found: error
 
@@ -94,8 +94,8 @@ jobs:
       - name: Decode optional release keystore
         if: env.RELEASE_KEYSTORE_BASE64 != ''
         run: |
-          echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/goated-release.jks"
-          echo "GOATED_ANDROID_KEYSTORE=$RUNNER_TEMP/goated-release.jks" >> "$GITHUB_ENV"
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/stellar-release.jks"
+          echo "GOATED_ANDROID_KEYSTORE=$RUNNER_TEMP/stellar-release.jks" >> "$GITHUB_ENV"
 
       - name: Test, lint, and build release APK
         working-directory: android-tv
@@ -107,16 +107,16 @@ jobs:
           APK="$(find android-tv/app/build/outputs/apk/release -name '*.apk' -print -quit)"
           test -n "$APK"
           if [[ "$APK" == *-unsigned.apk ]]; then
-            NAME="goated-android-tv-v${{ needs.verify.outputs.version }}-unsigned.apk"
+            NAME="stellar-android-tv-v${{ needs.verify.outputs.version }}-unsigned.apk"
           else
-            NAME="goated-android-tv-v${{ needs.verify.outputs.version }}.apk"
+            NAME="stellar-android-tv-v${{ needs.verify.outputs.version }}.apk"
           fi
           cp "$APK" "dist/$NAME"
 
       - name: Upload Android TV artifact
         uses: actions/upload-artifact@v4
         with:
-          name: goated-android-tv-v${{ needs.verify.outputs.version }}
+          name: stellar-android-tv-v${{ needs.verify.outputs.version }}
           path: dist/*.apk
           if-no-files-found: error
 
