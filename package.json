@@ -59,7 +59,7 @@
     "node": ">=20.19"
   },
   "devDependencies": {
-    "eslint": "10.8.1",
+    "eslint": "10.10.0",
     "prettier": "3.9.6"
   }
 }
