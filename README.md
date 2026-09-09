@@ -88,14 +88,23 @@ Using a new explicit version is important because TizenBrew 2.0.5 can retain an 
 
 #### Recommended: Downloader app
 
-This is the easiest installation method and does not require a computer:
+This is the easiest installation method and does not require a computer.
+
+| Download method | v1.0.0 value |
+| --------------- | ------------ |
+| **Downloader code** | **`3308586`** |
+| Short URL | [`aftv.news/3308586`](https://aftv.news/3308586) |
+| Direct APK | [`stellar-android-tv-v1.0.0.apk`](https://github.com/Ticklect/stellar-tv/releases/download/v1.0.0/stellar-android-tv-v1.0.0.apk) |
 
 1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
-2. Use the current Stellar Downloader code listed in this section after the v1.0.0 release is published.
-3. Download the Stellar TV APK.
-4. If Android asks for permission, allow Downloader to install unknown apps.
-5. Return to Downloader and install the APK.
-6. Launch **Stellar TV** from the TV's Apps screen.
+2. Enter **`3308586`** in Downloader's URL/code box.
+3. If needed, enter `aftv.news/3308586` instead.
+4. Download the Stellar TV APK.
+5. If Android asks for permission, allow Downloader to install unknown apps.
+6. Return to Downloader and install the APK.
+7. Launch **Stellar TV** from the TV's Apps screen.
+
+The code above points to the v1.0.0 APK. Check the latest release before using it after a newer Stellar TV version is published.
 
 #### Alternative: direct GitHub download
 
