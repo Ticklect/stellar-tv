@@ -90,11 +90,9 @@ Using a new explicit version is important because TizenBrew 2.0.5 can retain an 
 
 This is the easiest installation method and does not require a computer.
 
-| Download method | v1.0.0 value |
-| --------------- | ------------ |
-| **Downloader code** | **`3308586`** |
-| Short URL | [`aftv.news/3308586`](https://aftv.news/3308586) |
-| Direct APK | [`stellar-android-tv-v1.0.0.apk`](https://github.com/Ticklect/stellar-tv/releases/download/v1.0.0/stellar-android-tv-v1.0.0.apk) |
+- **Downloader code (v1.0.0):** `3308586`
+- **Short URL:** [`aftv.news/3308586`](https://aftv.news/3308586)
+- **Direct APK:** [`stellar-android-tv-v1.0.0.apk`](https://github.com/Ticklect/stellar-tv/releases/download/v1.0.0/stellar-android-tv-v1.0.0.apk)
 
 1. Install and open **Downloader by AFTVnews** on the Android TV or Google TV device.
 2. Enter **`3308586`** in Downloader's URL/code box.
