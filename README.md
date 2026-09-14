@@ -203,6 +203,14 @@ The object contains the module version plus an error area, message, and timestam
 - Confirm the version shown by TizenBrew before launching.
 - Fully close and reopen TizenBrew if its service retained the old module in memory.
 
+### The page is unstyled or does not work on Tizen 4
+
+Samsung maps Tizen 4.0 to Chromium 56. Stellar's current live web build uses CSS cascade layers and JavaScript syntax newer than that engine can parse, so ordinary API polyfills cannot make the modern Next.js/Tailwind client bundle run unchanged. See [compatibility](docs/COMPATIBILITY.md) for the current evidence.
+
+On Tizen 4 only, the module now enables a rescue layer after the ad-disabled clean reload. It applies a Chromium-56-safe fallback layout to Stellar's server-rendered markup, identifies poster cards and horizontal rails, and forces safe same-site links through full-page navigation so browsing does not depend on the modern Next.js client router. The rescue layer is deliberately isolated from newer Tizen versions and Android TV.
+
+This fallback does not transpile Stellar's downloaded JavaScript. Routes or playback flows that exist only inside the modern client bundle can still require an upstream legacy build or a dedicated legacy frontend. Until the rescue path is exercised on physical Tizen 4 hardware, compatibility remains **Reported**, not **Confirmed**.
+
 ### Remote controls do not respond or focus is misplaced
 
 - Confirm the module, rather than the unmodified Stellar site, was launched.

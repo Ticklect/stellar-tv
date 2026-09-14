@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { parse } from 'acorn';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import test from 'node:test';
@@ -13,6 +14,7 @@ function loadModuleInternals() {
       clampedSeekTime: clampedSeekTime,
       choiceIndexAfterStep: choiceIndexAfterStep,
       controlLabel: controlLabel,
+      disableTizenSiteAds: typeof disableTizenSiteAds === 'function' ? disableTizenSiteAds : null,
       directionalScore: directionalScore,
       isSideDrawerRect: isSideDrawerRect,
       isVideoCard: isVideoCard,
@@ -77,6 +79,52 @@ function loadModuleInternals() {
 
 const moduleUnderTest = loadModuleInternals();
 
+test('Tizen startup disables click ads before the rest of the module initializes', () => {
+  const source = fs.readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+  let stored = JSON.stringify({ theme: 'dark' });
+  let reloads = 0;
+  const window = {
+    console: { warn() {} },
+    localStorage: {
+      getItem: () => stored,
+      setItem(key, value) {
+        if (key === 'site_settings') stored = value;
+      }
+    },
+    location: {
+      reload() {
+        reloads += 1;
+      }
+    }
+  };
+  window.top = window;
+  window.self = window;
+
+  vm.runInNewContext(
+    source,
+    {
+      Array,
+      JSON,
+      location: { hostname: 'stellar.gdn' },
+      navigator: {
+        userAgent:
+          'Mozilla/5.0 (SMART-TV; Linux; Tizen 4.0) AppleWebKit/537.36 Chrome/56.0.2924.0 TV Safari/537.36'
+      },
+      window
+    },
+    { filename: 'main.js' }
+  );
+
+  assert.equal(reloads, 1);
+  assert.deepEqual(JSON.parse(stored), { theme: 'dark', enableAdsV2: false });
+  assert.equal(window.__goatedTizenBrewDiagnostics.lastError, null);
+});
+
+test('Tizen module does not require JavaScript syntax newer than ES2017', () => {
+  const source = fs.readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+  assert.doesNotThrow(() => parse(source, { ecmaVersion: 2017, sourceType: 'script' }));
+});
+
 test('runtime diagnostics version matches package metadata', () => {
   const packageJson = JSON.parse(
     fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')
@@ -85,6 +133,83 @@ test('runtime diagnostics version matches package metadata', () => {
     moduleUnderTest.context.window.__goatedTizenBrewDiagnostics.version,
     packageJson.version
   );
+});
+
+test('disables Stellar click ads on Tizen while preserving site settings and reloads once', () => {
+  const { disableTizenSiteAds, context } = moduleUnderTest;
+  assert.equal(typeof disableTizenSiteAds, 'function');
+
+  let stored = JSON.stringify({ theme: 'dark', autoplay: true });
+  let reloads = 0;
+  context.navigator.userAgent =
+    'Mozilla/5.0 (SMART-TV; Linux; Tizen 4.0) AppleWebKit/537.36 Chrome/56.0.2924.0 TV Safari/537.36';
+  context.location.hostname = 'stellar.gdn';
+  context.window.localStorage = {
+    getItem(key) {
+      return key === 'site_settings' ? stored : null;
+    },
+    setItem(key, value) {
+      if (key === 'site_settings') stored = value;
+    }
+  };
+  context.window.location.reload = () => {
+    reloads += 1;
+  };
+
+  assert.equal(disableTizenSiteAds(), true);
+  assert.deepEqual(JSON.parse(stored), {
+    theme: 'dark',
+    autoplay: true,
+    enableAdsV2: false
+  });
+  assert.equal(reloads, 1);
+
+  assert.equal(disableTizenSiteAds(), false);
+  assert.equal(reloads, 1);
+});
+
+test('does not change Stellar ad settings for a non-Tizen smart TV on stellar.gdn', () => {
+  const { disableTizenSiteAds, context } = moduleUnderTest;
+  let writes = 0;
+  let reloads = 0;
+  context.navigator.userAgent =
+    'Mozilla/5.0 (SMART-TV; Linux; Web0S) AppleWebKit/537.36 Chrome/79.0.3945.79 Safari/537.36';
+  context.location.hostname = 'stellar.gdn';
+  context.window.localStorage = {
+    getItem: () => JSON.stringify({ enableAdsV2: true }),
+    setItem: () => {
+      writes += 1;
+    }
+  };
+  context.window.location.reload = () => {
+    reloads += 1;
+  };
+
+  assert.equal(disableTizenSiteAds(), false);
+  assert.equal(writes, 0);
+  assert.equal(reloads, 0);
+});
+
+test('repairs malformed Stellar settings before disabling Tizen click ads', () => {
+  const { disableTizenSiteAds, context } = moduleUnderTest;
+  let stored = '{broken-json';
+  let reloads = 0;
+  context.navigator.userAgent =
+    'Mozilla/5.0 (SMART-TV; Linux; Tizen 4.0) AppleWebKit/537.36 Chrome/56.0.2924.0 TV Safari/537.36';
+  context.location.hostname = 'stellar.gdn';
+  context.window.localStorage = {
+    getItem: () => stored,
+    setItem(key, value) {
+      if (key === 'site_settings') stored = value;
+    }
+  };
+  context.window.location.reload = () => {
+    reloads += 1;
+  };
+
+  assert.equal(disableTizenSiteAds(), true);
+  assert.deepEqual(JSON.parse(stored), { enableAdsV2: false });
+  assert.equal(reloads, 1);
 });
 
 test('Android TV uses the standard WebView viewport without native global scaling', () => {

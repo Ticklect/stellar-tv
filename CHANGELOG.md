@@ -4,6 +4,19 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+
+- A syntax regression check keeps the injected Tizen module parseable as ES2017 instead of accidentally introducing newer JavaScript syntax.
+- A Tizen 4 rescue mode applies Chromium-56-safe fallback styling to Stellar's server-rendered pages, identifies poster rails for TV navigation, and forces safe same-site links through full-page navigation instead of relying on the modern client router.
+
+### Changed
+
+- Documented the reported Tizen 4.0 / Chromium 56 incompatibility with Stellar's current live Next.js/Tailwind payload.
+
+### Fixed
+
+- On Tizen, preserve existing Stellar site settings while forcing the site's `enableAdsV2` preference off and reloading once, preventing the live page's click-ad loader from being re-injected on the clean load.
+
 ## [1.0.0] - 2026-09-08
 
 ### Changed

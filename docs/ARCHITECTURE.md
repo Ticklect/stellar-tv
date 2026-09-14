@@ -43,7 +43,7 @@ The Android WebView permits only HTTPS Stellar pages in-app. Other HTTP(S) links
 
 ## Runtime entry and state
 
-`main.js` is an immediately invoked function. It installs TV-only source acceleration before DOM startup, then waits for `DOMContentLoaded` when necessary. The shared `state` object tracks:
+`main.js` is an immediately invoked function. On Tizen at `stellar.gdn`, it first preserves the site's existing `site_settings`, forces `enableAdsV2` off, and performs one reload when that value changed. Stellar's own head loader then sees the disabled setting before it can add its click-ad script. After that clean load, the module installs TV-only source acceleration before DOM startup and waits for `DOMContentLoaded` when necessary. The shared `state` object tracks:
 
 - Current focused element and preferred horizontal position
 - Previous focus and active modal scope
@@ -126,5 +126,9 @@ These optimizations are coupled to the target site's current DOM class patterns.
 `package.json` declares `packageType: "mods"`, `websiteURL`, the injected `main`, and media keys. Version-pinned GitHub module identities are recommended because TizenBrew 2.0.5 may retain a previous injected script in memory.
 
 The module intentionally does not enable `evaluateScriptOnDocumentStart`. TizenBrew 2.0.5's launch path for document-start GitHub modules has compatibility limitations, while normal injection occurs early enough on the root page for the single-page application's later watch-route requests.
+
+The module itself is kept within an ES2017 parser target to reduce syntax incompatibility with older Samsung web engines. Initial parser-discovered JavaScript and CSS assets are still fetched and parsed by the browser before a normal site-modification script can transform their response bytes, so the module does not attempt to transpile Stellar's modern client bundle.
+
+For Tizen 4.0 specifically, `main.js` instead activates a rescue path after DOM startup. The path injects a Chromium-56-safe fallback stylesheet, classifies server-rendered poster links into navigable cards/rails, reapplies those classifications to added DOM nodes, and intercepts safe same-origin anchor activation in the capture phase to force a full document navigation before the unusable modern client router runs. This can recover server-rendered browsing without changing the delivery architecture; client-only routes and playback still depend on what the upstream site exposes to that old engine.
 
 `app/index.html` is a minimal redirect/fallback artifact. The current `mods` launch path is controlled by `websiteURL`, not `appPath`.

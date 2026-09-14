@@ -6,10 +6,13 @@ Statuses are evidence labels:
 - **Reported** — a user report exists, but the maintainers have not reproduced it.
 - **Untested** — no project-specific result is available.
 
-| Device / Tizen version                              | TizenBrew version | Status    | Notes                                                                                                             |
-| --------------------------------------------------- | ----------------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
-| Samsung UE50U8000…KXXU / Tizen version not recorded | 2.0.5             | Confirmed | Remote navigation, title selection, source loading, and video playback confirmed with module 0.4.1 on 2026-08-11. |
-| Other Samsung/Tizen configurations                  | Other versions    | Untested  | Do not infer support from the confirmed device. Reports are welcome.                                              |
+| Device / Tizen version                              | TizenBrew version | Status    | Notes                                                                                                                                                                                                                                                                      |
+| --------------------------------------------------- | ----------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Samsung UE50U8000…KXXU / Tizen version not recorded | 2.0.5             | Confirmed | Remote navigation, title selection, source loading, and video playback confirmed with module 0.4.1 on 2026-08-11.                                                                                                                                                          |
+| Samsung Tizen 4.0 / Chromium 56                     | 2.0.5             | Reported  | Reported unstyled/non-functional on 2026-09-14. The current live Stellar build uses CSS cascade layers and JavaScript syntax that Chromium 56 cannot parse. The Tizen module can suppress the separate click-ad redirect, but it cannot make that site payload compatible. |
+| Other Samsung/Tizen configurations                  | Other versions    | Untested  | Do not infer support from the confirmed device. Reports are welcome.                                                                                                                                                                                                       |
+
+Samsung's [web engine table](https://developer.samsung.com/smarttv/develop/specifications/web-engine-specifications.html) maps Tizen 4.0 to Chromium M56. The injected `main.js` is kept at ES2017-or-older syntax and is checked in the test suite, but that does not transpile the remote Stellar website. JavaScript polyfills can add missing APIs; they cannot repair syntax that the browser fails to parse, and they cannot make Chromium 56 understand discarded CSS cascade-layer blocks.
 
 ## Android TV / Google TV
 
