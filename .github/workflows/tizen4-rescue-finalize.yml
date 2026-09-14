@@ -1,0 +1,39 @@
+name: Finalize Tizen 4 rescue
+
+on:
+  push:
+    branches:
+      - fix/tizen4-ad-compat
+    paths:
+      - .github/workflows/tizen4-rescue-finalize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/tizen4-ad-compat
+          fetch-depth: 0
+
+      - name: Apply final rescue fixes
+        run: python3 scripts/finalize-tizen4-rescue.py
+
+      - name: Format and validate Node/Tizen code
+        run: |
+          npm ci
+          npx prettier --write main.js README.md docs/ARCHITECTURE.md
+          npm run validate
+
+      - name: Commit final rescue fixes
+        run: |
+          rm .github/workflows/tizen4-rescue-finalize.yml scripts/finalize-tizen4-rescue.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add main.js README.md docs/ARCHITECTURE.md .github/workflows/tizen4-rescue-finalize.yml scripts/finalize-tizen4-rescue.py
+          git commit -m "fix: harden Tizen 4 rescue rendering"
+          git push origin HEAD:fix/tizen4-ad-compat
