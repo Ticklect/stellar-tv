@@ -25,6 +25,37 @@
     }
   }
 
+  function disableTizenSiteAds() {
+    var userAgent = navigator.userAgent || '';
+    if (!/Tizen/i.test(userAgent) || location.hostname !== 'stellar.gdn') return false;
+
+    try {
+      if (!window.localStorage) return false;
+      var rawSettings = window.localStorage.getItem('site_settings');
+      var settings = {};
+      if (rawSettings) {
+        try {
+          settings = JSON.parse(rawSettings);
+        } catch (error) {
+          reportError('site-settings-parse', error);
+          settings = {};
+        }
+      }
+      if (!settings || typeof settings !== 'object' || Array.isArray(settings)) settings = {};
+      if (settings.enableAdsV2 === false) return false;
+
+      settings.enableAdsV2 = false;
+      window.localStorage.setItem('site_settings', JSON.stringify(settings));
+      if (window.location && typeof window.location.reload === 'function') window.location.reload();
+      return true;
+    } catch (error) {
+      reportError('site-ad-setting', error);
+      return false;
+    }
+  }
+
+  if (disableTizenSiteAds()) return;
+
   function monotonicNow() {
     return window.performance && typeof window.performance.now === 'function'
       ? window.performance.now()

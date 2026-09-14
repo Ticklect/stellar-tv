@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+
+- A syntax regression check keeps the injected Tizen module parseable as ES2017 instead of accidentally introducing newer JavaScript syntax.
+
+### Changed
+
+- Documented the reported Tizen 4.0 / Chromium 56 incompatibility with Stellar's current live Next.js/Tailwind payload.
+
+### Fixed
+
+- On Tizen, preserve existing Stellar site settings while forcing the site's `enableAdsV2` preference off and reloading once, preventing the live page's click-ad loader from being re-injected on the clean load.
+
 ## [1.0.0] - 2026-09-08
 
 ### Changed

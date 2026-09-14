@@ -203,6 +203,12 @@ The object contains the module version plus an error area, message, and timestam
 - Confirm the version shown by TizenBrew before launching.
 - Fully close and reopen TizenBrew if its service retained the old module in memory.
 
+### The page is unstyled or does not work on Tizen 4
+
+Samsung maps Tizen 4.0 to Chromium 56. Stellar's current live web build uses CSS cascade layers and JavaScript syntax newer than that engine can parse, so a JavaScript polyfill inside this module cannot make the full site compatible. See [compatibility](docs/COMPATIBILITY.md) for the current evidence.
+
+The Tizen module itself remains parseable as ES2017 and disables Stellar's optional click-ad setting before a clean reload, which addresses unrelated-site popunder/redirect behavior. Full browsing and playback on Tizen 4 still require Stellar to provide a legacy browser build or another delivery path that transpiles the complete site runtime and CSS for Chromium 56.
+
 ### Remote controls do not respond or focus is misplaced
 
 - Confirm the module, rather than the unmodified Stellar site, was launched.
