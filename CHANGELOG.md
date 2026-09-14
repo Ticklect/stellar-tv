@@ -7,6 +7,7 @@ All notable changes to this project are documented in this file. The format is b
 ### Added
 
 - A syntax regression check keeps the injected Tizen module parseable as ES2017 instead of accidentally introducing newer JavaScript syntax.
+- A Tizen 4 rescue mode applies Chromium-56-safe fallback styling to Stellar's server-rendered pages, identifies poster rails for TV navigation, and forces safe same-site links through full-page navigation instead of relying on the modern client router.
 
 ### Changed
 
