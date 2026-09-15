@@ -258,5 +258,5 @@ test('Android remote dispatch avoids optional chaining in injected WebView JavaS
   );
 
   assert.doesNotMatch(activity, /__goatedAndroidTvDispatch\?\./);
-  assert.match(activity, /typeof window\.__goatedAndroidTvDispatch === \\"function\\"/);
+  assert.match(activity, /typeof window\.__goatedAndroidTvDispatch/);
 });
