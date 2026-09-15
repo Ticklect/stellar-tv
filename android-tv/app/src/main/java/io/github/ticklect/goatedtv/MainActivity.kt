@@ -238,8 +238,8 @@ class MainActivity : Activity() {
     }
 
     private fun dispatchRemoteKey(remoteKey: WebRemoteKey, result: ((Boolean) -> Unit)? = null) {
-        val script = "window.__goatedAndroidTvDispatch?.(" +
-            "${jsString(remoteKey.key)},${remoteKey.keyCode}) === true"
+        val script = "(typeof window.__goatedAndroidTvDispatch === \"function\") && " +
+            "window.__goatedAndroidTvDispatch(${jsString(remoteKey.key)},${remoteKey.keyCode}) === true"
         webView?.evaluateJavascript(script) { value ->
             if (result != null) TvLog.debug("Web key result=$value")
             result?.invoke(value == "true")

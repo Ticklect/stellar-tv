@@ -453,6 +453,7 @@
     preferredX: null,
     previousScope: null,
     previousFocus: null,
+    focusMemory: typeof WeakMap === 'function' ? new WeakMap() : null,
     mutationTimer: null,
     domVersion: 0,
     candidateCache: typeof WeakMap === 'function' ? new WeakMap() : null,
@@ -541,13 +542,31 @@
     rail.classList.add(VIDEO_RAIL_CLASS);
   }
 
+  function isHiddenByAncestor(element) {
+    var node = element;
+    while (node) {
+      if (
+        node.hidden ||
+        (node.hasAttribute && node.hasAttribute('hidden')) ||
+        (node.hasAttribute && node.hasAttribute('inert')) ||
+        (node.getAttribute && node.getAttribute('aria-hidden') === 'true')
+      )
+        return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
   function isVisible(element) {
     if (!element || !element.isConnected || element.disabled) return false;
-    if (element.getAttribute('aria-hidden') === 'true') return false;
+    if (element.getAttribute('aria-disabled') === 'true' || isHiddenByAncestor(element))
+      return false;
     var rect = rectOf(element);
     if (rect.width < 2 || rect.height < 2) return false;
     var style = window.getComputedStyle(element);
-    return style.display !== 'none' && style.visibility !== 'hidden';
+    return (
+      style.display !== 'none' && style.visibility !== 'hidden' && style.visibility !== 'collapse'
+    );
   }
 
   function numericZIndex(element) {
@@ -833,27 +852,34 @@
   function setFocus(element, preservePreferredX) {
     if (!element || !isVisible(element)) return false;
     var previousPreferredX = state.preferredX;
+    if (!safeFocus(element, { preventScroll: true })) return false;
     if (state.current !== element) clearFocusDecoration();
     state.current = element;
     element.classList.add(FOCUS_CLASS);
     state.focusSurface = focusSurfaceFor(element);
     if (state.focusSurface) state.focusSurface.classList.add(FOCUS_SURFACE_CLASS);
-    safeFocus(element, { preventScroll: true });
     scrollToElement(element);
     state.preferredX = preservePreferredX ? previousPreferredX : centerOf(element).x;
     return true;
   }
 
   function focusedElement() {
-    if (state.current && isVisible(state.current) && state.current.classList.contains(FOCUS_CLASS))
-      return state.current;
+    var active = document.activeElement;
     if (
-      document.activeElement &&
-      document.activeElement !== document.body &&
-      isVisible(document.activeElement)
-    ) {
-      state.current = document.activeElement;
+      state.current &&
+      isVisible(state.current) &&
+      state.current.classList.contains(FOCUS_CLASS) &&
+      active &&
+      active !== document.body &&
+      (active === state.current || (state.current.contains && state.current.contains(active)))
+    )
+      return state.current;
+    if (active && active !== document.body && isVisible(active)) {
+      if (state.current !== active) clearFocusDecoration();
+      state.current = active;
       state.current.classList.add(FOCUS_CLASS);
+      state.focusSurface = focusSurfaceFor(active);
+      if (state.focusSurface) state.focusSurface.classList.add(FOCUS_SURFACE_CLASS);
       return state.current;
     }
     return null;
@@ -869,16 +895,28 @@
     return play || items[0];
   }
 
+  function rememberFocusForScope(scope, element) {
+    if (!scope || !element) return;
+    if (state.focusMemory) state.focusMemory.set(scope, element);
+    else if (scope === document.body) state.previousFocus = element;
+  }
+
+  function rememberedFocusForScope(scope) {
+    if (!scope) return null;
+    var remembered = state.focusMemory
+      ? state.focusMemory.get(scope)
+      : scope === document.body
+        ? state.previousFocus
+        : null;
+    if (!remembered || !isVisible(remembered) || !scope.contains(remembered)) return null;
+    return remembered;
+  }
+
   function ensureFocus(force) {
     var scope = activeScope();
     if (scope !== state.previousScope) {
-      if (
-        scope !== document.body &&
-        state.previousScope &&
-        state.current &&
-        state.previousScope.contains(state.current)
-      ) {
-        state.previousFocus = state.current;
+      if (state.previousScope && state.current && state.previousScope.contains(state.current)) {
+        rememberFocusForScope(state.previousScope, state.current);
       }
       state.previousScope = scope;
       force = true;
@@ -887,11 +925,8 @@
     var current = focusedElement();
     if (!force && current && scope.contains(current)) return;
 
-    if (scope === document.body && state.previousFocus && isVisible(state.previousFocus)) {
-      setFocus(state.previousFocus);
-      state.previousFocus = null;
-      return;
-    }
+    var remembered = rememberedFocusForScope(scope);
+    if (remembered && setFocus(remembered)) return;
     setFocus(preferredInitial(scope));
   }
 
@@ -901,6 +936,7 @@
     clearFocusDecoration();
     state.current = null;
     state.previousFocus = null;
+    state.focusMemory = typeof WeakMap === 'function' ? new WeakMap() : null;
     state.previousScope = null;
     state.preferredX = null;
     state.domVersion += 1;
@@ -1414,8 +1450,16 @@
 
     var current = focusedElement();
     if (isTextInput(current)) {
+      var scopeItems = candidates(activeScope());
+      var preferred = searchNavigationTarget('down', current, scopeItems);
       current.blur();
-      ensureFocus(true);
+      clearFocusDecoration();
+      state.current = null;
+      state.preferredX = null;
+      if (preferred && setFocus(preferred)) return true;
+      for (var itemIndex = 0; itemIndex < scopeItems.length; itemIndex++) {
+        if (scopeItems[itemIndex] !== current && setFocus(scopeItems[itemIndex])) return true;
+      }
       return true;
     }
 
@@ -1494,7 +1538,11 @@
 
     if (/^Arrow(Up|Down|Left|Right)$/.test(key)) {
       var active = focusedElement();
-      if (isAndroidTv && isSlider(active) && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+      if (
+        isSlider(active) &&
+        (isAndroidTv || active.tagName !== 'INPUT') &&
+        (key === 'ArrowLeft' || key === 'ArrowRight')
+      ) {
         adjustSlider(active, key === 'ArrowLeft' ? 'left' : 'right');
         event.preventDefault();
         event.stopPropagation();
@@ -1537,27 +1585,43 @@
     state.preferredX = centerOf(target).x;
   }
 
+  function normalizedCandidateClass(value) {
+    var owned = [FOCUS_CLASS, FOCUS_SURFACE_CLASS, VIDEO_CARD_CLASS, VIDEO_RAIL_CLASS];
+    return String(value || '')
+      .split(/\s+/)
+      .filter(function (name) {
+        return name && owned.indexOf(name) === -1;
+      })
+      .sort()
+      .join(' ');
+  }
+
+  function candidateMutationAffectsCache(record) {
+    if (!record) return false;
+    if (record.type === 'attributes') {
+      if (record.attributeName === 'class') {
+        var currentClass =
+          record.target && record.target.getAttribute ? record.target.getAttribute('class') : '';
+        return normalizedCandidateClass(record.oldValue) !== normalizedCandidateClass(currentClass);
+      }
+      return true;
+    }
+    if (record.type !== 'childList') return false;
+    var changedNodes = Array.prototype.slice
+      .call(record.addedNodes || [])
+      .concat(Array.prototype.slice.call(record.removedNodes || []));
+    return changedNodes.some(function (node) {
+      return (
+        node.nodeType === 1 &&
+        ((node.matches && node.matches(SELECTOR)) ||
+          (node.querySelector && node.querySelector(SELECTOR)))
+      );
+    });
+  }
+
   function scheduleRefresh(records) {
     var routeChanged = resetFocusForRoute();
-    if (
-      records &&
-      records.some(function (record) {
-        if (record.type === 'attributes') {
-          return record.attributeName !== 'class' && record.attributeName !== 'style';
-        }
-        var changedNodes = Array.prototype.slice
-          .call(record.addedNodes || [])
-          .concat(Array.prototype.slice.call(record.removedNodes || []));
-        return changedNodes.some(function (node) {
-          return (
-            node.nodeType === 1 &&
-            ((node.matches && node.matches(SELECTOR)) ||
-              (node.querySelector && node.querySelector(SELECTOR)))
-          );
-        });
-      })
-    )
-      state.domVersion += 1;
+    if (records && records.some(candidateMutationAffectsCache)) state.domVersion += 1;
     if (state.mutationTimer) return;
     state.mutationTimer = setTimeout(function () {
       state.mutationTimer = null;
@@ -1617,7 +1681,24 @@
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['class', 'style', 'hidden', 'aria-hidden', 'aria-modal']
+      attributeOldValue: true,
+      attributeFilter: [
+        'class',
+        'style',
+        'hidden',
+        'aria-hidden',
+        'aria-modal',
+        'aria-disabled',
+        'disabled',
+        'tabindex',
+        'role',
+        'href',
+        'contenteditable',
+        'inert',
+        'data-state',
+        'aria-expanded',
+        'open'
+      ]
     });
     setTimeout(function () {
       ensureFocus(true);
