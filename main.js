@@ -559,14 +559,13 @@
 
   function isVisible(element) {
     if (!element || !element.isConnected || element.disabled) return false;
-    if (element.getAttribute('aria-disabled') === 'true' || isHiddenByAncestor(element)) return false;
+    if (element.getAttribute('aria-disabled') === 'true' || isHiddenByAncestor(element))
+      return false;
     var rect = rectOf(element);
     if (rect.width < 2 || rect.height < 2) return false;
     var style = window.getComputedStyle(element);
     return (
-      style.display !== 'none' &&
-      style.visibility !== 'hidden' &&
-      style.visibility !== 'collapse'
+      style.display !== 'none' && style.visibility !== 'hidden' && style.visibility !== 'collapse'
     );
   }
 
@@ -872,8 +871,7 @@
       state.current.classList.contains(FOCUS_CLASS) &&
       active &&
       active !== document.body &&
-      (active === state.current ||
-        (state.current.contains && state.current.contains(active)))
+      (active === state.current || (state.current.contains && state.current.contains(active)))
     )
       return state.current;
     if (active && active !== document.body && isVisible(active)) {
@@ -917,11 +915,7 @@
   function ensureFocus(force) {
     var scope = activeScope();
     if (scope !== state.previousScope) {
-      if (
-        state.previousScope &&
-        state.current &&
-        state.previousScope.contains(state.current)
-      ) {
+      if (state.previousScope && state.current && state.previousScope.contains(state.current)) {
         rememberFocusForScope(state.previousScope, state.current);
       }
       state.previousScope = scope;
@@ -1456,8 +1450,16 @@
 
     var current = focusedElement();
     if (isTextInput(current)) {
+      var scopeItems = candidates(activeScope());
+      var preferred = searchNavigationTarget('down', current, scopeItems);
       current.blur();
-      ensureFocus(true);
+      clearFocusDecoration();
+      state.current = null;
+      state.preferredX = null;
+      if (preferred && setFocus(preferred)) return true;
+      for (var itemIndex = 0; itemIndex < scopeItems.length; itemIndex++) {
+        if (scopeItems[itemIndex] !== current && setFocus(scopeItems[itemIndex])) return true;
+      }
       return true;
     }
 
