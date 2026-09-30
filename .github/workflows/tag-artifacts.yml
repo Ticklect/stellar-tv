@@ -56,7 +56,7 @@ jobs:
             package.json main.js app LICENSE LICENSE.GPL README.md CHANGELOG.md THIRD_PARTY_NOTICES.md
 
       - name: Upload TizenBrew artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: stellar-tizenbrew-v${{ needs.verify.outputs.version }}
           path: dist/*.zip
@@ -114,7 +114,7 @@ jobs:
           cp "$APK" "dist/$NAME"
 
       - name: Upload Android TV artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: stellar-android-tv-v${{ needs.verify.outputs.version }}
           path: dist/*.apk
